@@ -12,9 +12,11 @@ public class ChessBoard {
 //        ChessBoard board = new ChessBoard();
 //        board.addPiece();
 //    }
+    ChessPiece[][] board;
 
     public ChessBoard() {
-
+        board = new ChessPiece[8][8];
+        resetBoard();
     }
 
     /**
@@ -24,7 +26,7 @@ public class ChessBoard {
      * @param piece    the piece to add
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
-        throw new RuntimeException("Not implemented");
+        board[position.row][position.col] = piece;
     }
 
     /**
@@ -35,7 +37,7 @@ public class ChessBoard {
      * position
      */
     public ChessPiece getPiece(ChessPosition position) {
-        throw new RuntimeException("Not implemented");
+        return board[position.getRow()][position.getColumn()];
     }
 
     /**
@@ -43,23 +45,45 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-        private void row_iterator(ChessPiece piece, int[] rows){
-            for (int n : rows){
-                board.addPiece(ChessGame.TeamColor.WHITE, piece);
-                board.addPiece(ChessGame.TeamColor.BLACK, piece);
-            }
-        }
+
         ChessPiece[][] board = new ChessPiece[8][8];
-        int[] pawns = new int[] {0,1,2,3,4,5,6,7};
-        for (int n : pawns){
-            board[1][n] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
+        int[] pawns = new int[] {1,2,3,4,5,6,7,8};
+
+        for (int n : pawns) {
+                addPiece(new ChessPosition(1, n), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN));
+                addPiece(new ChessPosition(6, n), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
         }
-        for (int n : pawns){
-            board[7][n] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN);
+
+        int[] rooks = new int[] {1,8};
+        row_iterator(ChessPiece.PieceType.ROOK, rooks);
+
+        int[] bishops = new int[] {3,6};
+        row_iterator(ChessPiece.PieceType.BISHOP, bishops);
+
+        int[] knights = new int[] {2,7};
+        row_iterator(ChessPiece.PieceType.KNIGHT, knights);
+
+        int[] kings = new int[] {5};
+        row_iterator(ChessPiece.PieceType.KING, kings);
+
+        int[] queens = new int[] {4};
+        row_iterator(ChessPiece.PieceType.QUEEN, queens);
+    }
+
+    /**
+     * iterates through rows on front and back rank to add pieces.
+     *
+     * @param type The ChessPiece.PieceType of your pieces.
+     * @param cols An integer array of the column indexes to add them to.
+     */
+    private void row_iterator(ChessPiece.PieceType type, int[] cols){
+        for (int n : cols) {
+                addPiece(new ChessPosition(1, n), new ChessPiece(ChessGame.TeamColor.WHITE, type));
+                addPiece(new ChessPosition(8, n), new ChessPiece(ChessGame.TeamColor.BLACK, type));
         }
-        int[] rooks = new int[] {0,7};
     }
-    }
+
 }
+
 
 // create a chess piece class, and the board should be an array of this chess piece thing.
