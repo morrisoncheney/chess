@@ -8,8 +8,13 @@ package chess;
  */
 public class ChessBoard {
 
+//    public static void main (String[] args){
+//        ChessBoard board = new ChessBoard();
+//        board.addPiece();
+//    }
+
     public ChessBoard() {
-        
+
     }
 
     /**
@@ -38,6 +43,23 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-        throw new RuntimeException("Not implemented");
+        private void row_iterator(ChessPiece piece, int[] rows){
+            for (int n : rows){
+                board.addPiece(ChessGame.TeamColor.WHITE, piece);
+                board.addPiece(ChessGame.TeamColor.BLACK, piece);
+            }
+        }
+        ChessPiece[][] board = new ChessPiece[8][8];
+        int[] pawns = new int[] {0,1,2,3,4,5,6,7};
+        for (int n : pawns){
+            board[1][n] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
+        }
+        for (int n : pawns){
+            board[7][n] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN);
+        }
+        int[] rooks = new int[] {0,7};
+    }
     }
 }
+
+// create a chess piece class, and the board should be an array of this chess piece thing.
