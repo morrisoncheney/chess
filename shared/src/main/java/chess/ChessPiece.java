@@ -10,8 +10,12 @@ import java.util.Collection;
  */
 public class ChessPiece {
 
-    public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
+    PieceType type;
+    ChessGame.TeamColor color;
 
+    public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
+        this.type = type;
+        this.color = pieceColor;
     }
 
     /**
@@ -30,14 +34,14 @@ public class ChessPiece {
      * @return Which team this chess piece belongs to
      */
     public ChessGame.TeamColor getTeamColor() {
-        throw new RuntimeException("Not implemented");
+        return this.color;
     }
 
     /**
      * @return which type of chess piece this piece is
      */
     public PieceType getPieceType() {
-        throw new RuntimeException("Not implemented");
+        return this.type;
     }
 
     /**
@@ -48,6 +52,13 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        throw new RuntimeException("Not implemented");
+        throw new RuntimeException("Not implemented"); // This will be a lot of work.
     }
 }
+// BISHOP: in 4 directions, using a while loop,
+// add 1 to r and c, and once you hit another object stop moving in that direction.
+// KNIGHT: knowing the shape, check the indexes of the possible positions,
+// and then add them to the list if they are empty.
+// KING: Go over every possible change in indexes. Create an array of arrays with x y cords.
+// Queen: BISHOP and ROOK
+// ROOK: Same as Bishop except different directions.

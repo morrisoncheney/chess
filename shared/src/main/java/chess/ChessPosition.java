@@ -10,8 +10,8 @@ public class ChessPosition {
     int row;
     int col;
     public ChessPosition(int row, int col) {
-        this.row = row - 1; // index
-        this.col = col - 1; // index
+        this.row = ( col * -1 ) + 9; // index
+        this.col = row - 1; // index
     }
 
     /**
@@ -27,6 +27,8 @@ public class ChessPosition {
      * 1 codes for the left row
      */
     public int getColumn() {
-        return this.col + 1;
+        return (this.col - 9 ) * -1;
     }
+
+
 }
