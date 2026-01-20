@@ -12,7 +12,7 @@ public class ChessPosition {
     int row;
     int col;
     public ChessPosition(int row, int col) {
-        this.row = ( col * -1 ) + 9; // index
+        this.row = ( col * -1 ) + 8; // index
         this.col = row - 1; // index
     }
 
