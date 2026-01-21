@@ -2,6 +2,7 @@ package chess;
 
 import java.util.Collection;
 import java.util.Objects;
+import java.util.ArrayList;
 
 /**
  * Represents a single chess piece
@@ -53,8 +54,40 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        throw new RuntimeException("Not implemented"); // This will be a lot of work.
+        Collection<ChessMove> moves = new ArrayList<ChessMove>();
+
+        if (this.type == PieceType.PAWN) {
+
+        } else if (this.type == PieceType.BISHOP) {
+
+        } else if (this.type == PieceType.ROOK) {
+
+        } else if (this.type == PieceType.KNIGHT) {
+
+        } else if (this.type == PieceType.QUEEN) {
+
+        } else if (this.type == PieceType.KING) {
+
+        }
+
+        return moves;
     }
+
+
+
+    // BISHOP: in 4 directions, using a while loop,
+    // add 1 to r and c, and once you hit another object stop moving in that direction.
+
+    // ROOK: Same as Bishop except different directions.
+
+    // KNIGHT: knowing the shape, check the indexes of the possible positions,
+    // and then add them to the list if they are empty.
+
+    // KING: Go over every possible change in indexes. Create an array of arrays with x y cords.
+
+    // Queen: BISHOP and ROOK
+
+
 
     @Override
     public boolean equals(Object o) {
@@ -70,10 +103,3 @@ public class ChessPiece {
         return Objects.hash(type, color);
     }
 }
-// BISHOP: in 4 directions, using a while loop,
-// add 1 to r and c, and once you hit another object stop moving in that direction.
-// KNIGHT: knowing the shape, check the indexes of the possible positions,
-// and then add them to the list if they are empty.
-// KING: Go over every possible change in indexes. Create an array of arrays with x y cords.
-// Queen: BISHOP and ROOK
-// ROOK: Same as Bishop except different directions.

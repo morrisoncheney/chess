@@ -18,7 +18,7 @@ public class ChessBoard {
     ChessPiece[][] board;
 
     public ChessBoard() {
-        board = new ChessPiece[8][8];
+        this.board = new ChessPiece[8][8];
     }
 
     /**
@@ -28,7 +28,7 @@ public class ChessBoard {
      * @param piece    the piece to add
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
-        board[position.row][position.col] = piece;
+        this.board[position.row][position.col] = piece;
     }
 
     /**
@@ -39,7 +39,7 @@ public class ChessBoard {
      * position
      */
     public ChessPiece getPiece(ChessPosition position) {
-        return board[position.getRow()][position.getColumn()];
+        return this.board[position.row][position.col];
     }
 
     /**
@@ -52,8 +52,8 @@ public class ChessBoard {
         int[] pawns = new int[] {1,2,3,4,5,6,7,8};
 
         for (int n : pawns) {
-                addPiece(new ChessPosition(1, n), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN));
-                addPiece(new ChessPosition(6, n), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
+                addPiece(new ChessPosition(2, n), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN));
+                addPiece(new ChessPosition(7, n), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
         }
 
         int[] rooks = new int[] {1,8};
