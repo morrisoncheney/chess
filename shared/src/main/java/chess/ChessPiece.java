@@ -56,23 +56,50 @@ public class ChessPiece {
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         Collection<ChessMove> moves = new ArrayList<ChessMove>();
 
-        if (this.type == PieceType.PAWN) {
+        ChessPiece piece = board.getPiece(myPosition);
 
-        } else if (this.type == PieceType.BISHOP) {
+        if (piece.type == PieceType.PAWN) {
 
-        } else if (this.type == PieceType.ROOK) {
+        } else if (piece.type == PieceType.BISHOP) {
 
-        } else if (this.type == PieceType.KNIGHT) {
+        } else if (piece.type == PieceType.ROOK) {
 
-        } else if (this.type == PieceType.QUEEN) {
+        } else if (piece.type == PieceType.KNIGHT) {
 
-        } else if (this.type == PieceType.KING) {
+        } else if (piece.type == PieceType.QUEEN) {
 
+        } else if (piece.type == PieceType.KING) {
+            moves = KingMoves(board, myPosition);
         }
 
         return moves;
     }
 
+    private Collection<ChessMove> KingMoves(ChessBoard board, ChessPosition p) {
+        ArrayList<ChessMove> kmoves = new ArrayList<ChessMove>();
+        int[][] king_possible_moves = {{-1,0},{-1,1},{0,1},{1,1},{1,0},{1,-1},{0,-1},{-1,-1}};
+
+        ChessPosition p_new;
+
+        for (int[] xy : king_possible_moves) {
+
+            int r = p.getRow() + xy[0];
+
+            int c = p.getColumn() + xy[1];
+
+            if (1 <= r && r <= 8 && 1 <= c && c <= 8) {
+                p_new = new ChessPosition(r, c);
+                ChessPiece inTheWay = board.getPiece(p_new);
+                if (inTheWay == null) {
+                    kmoves.add(new ChessMove(p,p_new,null));
+                } else if (inTheWay.getTeamColor() != board.getPiece(p).getTeamColor()) {
+                    kmoves.add(new ChessMove(p,p_new,null));
+                }
+            }
+        }
+
+        return kmoves;
+    }
 
 
     // BISHOP: in 4 directions, using a while loop,
@@ -101,5 +128,13 @@ public class ChessPiece {
     @Override
     public int hashCode() {
         return Objects.hash(type, color);
+    }
+
+    @Override
+    public String toString() {
+        return "ChessPiece{" +
+                "type=" + type +
+                ", color=" + color +
+                '}';
     }
 }

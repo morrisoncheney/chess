@@ -29,7 +29,7 @@ public class ChessPosition {
      * 1 codes for the left row
      */
     public int getColumn() {
-        return (this.col - 9 ) * -1;
+        return (this.col - 8 ) * -1;
     }
 
     @Override
@@ -44,5 +44,13 @@ public class ChessPosition {
     @Override
     public int hashCode() {
         return Objects.hash(row, col);
+    }
+
+    @Override
+    public String toString() {
+        return "ChessPosition{" +
+                "row=" + row +
+                ", col=" + col +
+                '}';
     }
 }
