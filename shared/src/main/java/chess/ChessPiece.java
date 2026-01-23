@@ -68,7 +68,7 @@ public class ChessPiece {
             moves = PieceMoves.RookMoves(board, myPosition);
 
         } else if (piece.type == PieceType.KNIGHT) {
-//            moves = PieceMoves.KnightMoves(board, myPosition);
+            moves = PieceMoves.KnightMoves(board, myPosition);
 
         } else if (piece.type == PieceType.QUEEN) {
             moves.addAll(PieceMoves.RookMoves(board, myPosition));
