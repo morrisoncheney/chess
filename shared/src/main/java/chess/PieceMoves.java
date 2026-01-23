@@ -5,60 +5,60 @@ import java.util.Collection;
 
 public class PieceMoves {
 
-    public static Collection<ChessMove> KingMoves(ChessBoard board, ChessPosition p) {
-        ArrayList<ChessMove> k_moves = new ArrayList<ChessMove>();
-        int[][] king_possible_moves = {{-1,0},{-1,1},{0,1},{1,1},{1,0},{1,-1},{0,-1},{-1,-1}};
+    public static Collection<ChessMove> kingMoves(ChessBoard board, ChessPosition p) {
+        ArrayList<ChessMove> kMoves = new ArrayList<ChessMove>();
+        int[][] kingPossibleMoves = {{-1,0},{-1,1},{0,1},{1,1},{1,0},{1,-1},{0,-1},{-1,-1}};
 
-        ChessPosition p_new;
+        ChessPosition pNew;
 
-        for (int[] xy : king_possible_moves) {
+        for (int[] xy : kingPossibleMoves) {
 
             int r = p.getRow() + xy[0];
 
             int c = p.getColumn() + xy[1];
 
             if (1 <= r && r <= 8 && 1 <= c && c <= 8) {
-                p_new = new ChessPosition(r, c);
-                ChessPiece inTheWay = board.getPiece(p_new);
+                pNew = new ChessPosition(r, c);
+                ChessPiece inTheWay = board.getPiece(pNew);
                 if (inTheWay == null) {
-                    k_moves.add(new ChessMove(p,p_new,null));
+                    kMoves.add(new ChessMove(p,pNew,null));
                 } else if (inTheWay.getTeamColor() != board.getPiece(p).getTeamColor()) {
-                    k_moves.add(new ChessMove(p,p_new,null));
+                    kMoves.add(new ChessMove(p,pNew,null));
                 }
             }
         }
 
-        return k_moves;
+        return kMoves;
     }
 
-    public static Collection<ChessMove> RookMoves(ChessBoard board, ChessPosition p) {
-        ArrayList<ChessMove> r_moves = new ArrayList<ChessMove>();
-        int[][] rook_possible_moves = {{-1,0},{0,1},{1,0},{0,-1}};
+    public static Collection<ChessMove> rookMoves(ChessBoard board, ChessPosition p) {
+        ArrayList<ChessMove> rMoves = new ArrayList<ChessMove>();
+        int[][] rookPossibleMoves = {{-1,0},{0,1},{1,0},{0,-1}};
 
-        ChessPosition p_new;
+        ChessPosition pNew;
 
 
 
-        for (int[] xy : rook_possible_moves ) {
+        for (int[] xy : rookPossibleMoves) {
             boolean cont = true;
-            p_new = p;
+            pNew = p;
             while (cont) {
 
-                int r = p_new.getRow() + xy[0];
+                int r = pNew.getRow() + xy[0];
 
-                int c = p_new.getColumn() + xy[1];
+                int c = pNew.getColumn() + xy[1];
 
                 if (1 <= r && r <= 8 && 1 <= c && c <= 8) {
 
-                    p_new = new ChessPosition(r,c);
+                    pNew = new ChessPosition(r,c);
 
-                    ChessPiece inTheWay = board.getPiece(p_new);
+                    ChessPiece inTheWay = board.getPiece(pNew);
 
                     if (inTheWay == null) {
-                        r_moves.add(new ChessMove(p, p_new, null));
+                        rMoves.add(new ChessMove(p, pNew, null));
 
                     } else if (inTheWay.getTeamColor() != board.getPiece(p).getTeamColor()) {
-                        r_moves.add(new ChessMove(p, p_new, null));
+                        rMoves.add(new ChessMove(p, pNew, null));
                         cont = false;
 
                     } else {
@@ -71,37 +71,37 @@ public class PieceMoves {
             }
         }
 
-        return r_moves;
+        return rMoves;
     }
 
-    public static Collection<ChessMove> BishopMoves(ChessBoard board, ChessPosition p) {
-        ArrayList<ChessMove> b_moves = new ArrayList<ChessMove>();
-        int[][] bishop_possible_moves = {{-1,-1},{-1,1},{1,-1},{1,1}};
+    public static Collection<ChessMove> bishopMoves(ChessBoard board, ChessPosition p) {
+        ArrayList<ChessMove> bMoves = new ArrayList<ChessMove>();
+        int[][] bishopPossibleMoves = {{-1,-1},{-1,1},{1,-1},{1,1}};
 
-        ChessPosition p_new;
+        ChessPosition pNew;
 
 
 
-        for (int[] xy : bishop_possible_moves ) {
+        for (int[] xy : bishopPossibleMoves) {
             boolean cont = true;
-            p_new = p;
+            pNew = p;
             while (cont) {
 
-                int r = p_new.getRow() + xy[0];
+                int r = pNew.getRow() + xy[0];
 
-                int c = p_new.getColumn() + xy[1];
+                int c = pNew.getColumn() + xy[1];
 
                 if (1 <= r && r <= 8 && 1 <= c && c <= 8) {
 
-                    p_new = new ChessPosition(r,c);
+                    pNew = new ChessPosition(r,c);
 
-                    ChessPiece inTheWay = board.getPiece(p_new);
+                    ChessPiece inTheWay = board.getPiece(pNew);
 
                     if (inTheWay == null) {
-                        b_moves.add(new ChessMove(p, p_new, null));
+                        bMoves.add(new ChessMove(p, pNew, null));
 
                     } else if (inTheWay.getTeamColor() != board.getPiece(p).getTeamColor()) {
-                        b_moves.add(new ChessMove(p, p_new, null));
+                        bMoves.add(new ChessMove(p, pNew, null));
                         cont = false;
 
                     } else {
@@ -114,44 +114,44 @@ public class PieceMoves {
             }
         }
 
-        return b_moves;
+        return bMoves;
     }
 
-    public static Collection<ChessMove> PawnMoves(ChessBoard board, ChessPosition p) {
-        ArrayList<ChessMove> p_moves = new ArrayList<ChessMove>();
-        ChessPosition p_new;
+    public static Collection<ChessMove> pawnMoves(ChessBoard board, ChessPosition p) {
+        ArrayList<ChessMove> pMoves = new ArrayList<ChessMove>();
+        ChessPosition pNew;
         ChessPiece inTheWay;
         ChessGame.TeamColor color = board.getPiece(p).getTeamColor();
         boolean hasMoved;
 
-        if (color == ChessGame.TeamColor.WHITE ){ /*////////////////////////////////////////////////////////////////////////////////*/
+        if (color == ChessGame.TeamColor.WHITE){ /*////////////////////////////////////////////////////////*/
             if (p.getRow() == 2) {
                 hasMoved = false;
             } else {
                 hasMoved = true;
             }
 
-            p_new = new ChessPosition(p.getRow() + 1, p.getColumn());
+            pNew = new ChessPosition(p.getRow() + 1, p.getColumn());
 
-            inTheWay = board.getPiece(p_new);
+            inTheWay = board.getPiece(pNew);
 
             boolean moveOne = false;
             if (inTheWay == null) {
-                if (p_new.getRow() == 8){
-                    p_moves.add(new ChessMove(p,p_new, ChessPiece.PieceType.QUEEN));
-                    p_moves.add(new ChessMove(p,p_new, ChessPiece.PieceType.BISHOP));
-                    p_moves.add(new ChessMove(p,p_new, ChessPiece.PieceType.ROOK));
-                    p_moves.add(new ChessMove(p,p_new, ChessPiece.PieceType.KNIGHT));
+                if (pNew.getRow() == 8){
+                    pMoves.add(new ChessMove(p,pNew, ChessPiece.PieceType.QUEEN));
+                    pMoves.add(new ChessMove(p,pNew, ChessPiece.PieceType.BISHOP));
+                    pMoves.add(new ChessMove(p,pNew, ChessPiece.PieceType.ROOK));
+                    pMoves.add(new ChessMove(p,pNew, ChessPiece.PieceType.KNIGHT));
                 } else {
-                    p_moves.add(new ChessMove(p,p_new, null));
+                    pMoves.add(new ChessMove(p,pNew, null));
                 }
                 moveOne = true;
             }
 
             if (!hasMoved) {
-                p_new = new ChessPosition(p.getRow() + 2, p.getColumn());
-                inTheWay = board.getPiece(p_new);
-                if (inTheWay == null && moveOne) { p_moves.add(new ChessMove(p,p_new,null)); }
+                pNew = new ChessPosition(p.getRow() + 2, p.getColumn());
+                inTheWay = board.getPiece(pNew);
+                if (inTheWay == null && moveOne) { pMoves.add(new ChessMove(p,pNew,null)); }
             }
 
             int[][] pawn_takes = {{1,1}, {1,-1}};
@@ -161,68 +161,67 @@ public class PieceMoves {
                 int c = p.getColumn() + xy[1];
 
                 if (1 <= r && r <= 8 && 1 <= c && c <= 8) {
-                    p_new = new ChessPosition(r, c);
-                    inTheWay = board.getPiece(p_new);
+                    pNew = new ChessPosition(r, c);
+                    inTheWay = board.getPiece(pNew);
                     if (inTheWay != null && inTheWay.getTeamColor() == ChessGame.TeamColor.BLACK){
-                        if (p_new.getRow() == 8){
-                            p_moves.add(new ChessMove(p,p_new, ChessPiece.PieceType.QUEEN));
-                            p_moves.add(new ChessMove(p,p_new, ChessPiece.PieceType.BISHOP));
-                            p_moves.add(new ChessMove(p,p_new, ChessPiece.PieceType.ROOK));
-                            p_moves.add(new ChessMove(p,p_new, ChessPiece.PieceType.KNIGHT));
+                        if (pNew.getRow() == 8){
+                            pMoves.add(new ChessMove(p,pNew, ChessPiece.PieceType.QUEEN));
+                            pMoves.add(new ChessMove(p,pNew, ChessPiece.PieceType.BISHOP));
+                            pMoves.add(new ChessMove(p,pNew, ChessPiece.PieceType.ROOK));
+                            pMoves.add(new ChessMove(p,pNew, ChessPiece.PieceType.KNIGHT));
                         } else {
-                            p_moves.add(new ChessMove(p,p_new, null));
+                            pMoves.add(new ChessMove(p,pNew, null));
                         }
                     }
                 }
             }
-        } else if (color == ChessGame.TeamColor.BLACK) { /*////////////////////////////////////////////////////////////////////////////////*/
+        } else if (color == ChessGame.TeamColor.BLACK) { /*///////////////////////////////////////////////////////*/
             if (p.getRow() == 7) {
                 hasMoved = false;
             } else {
                 hasMoved = true;
             }
 
-            p_new = new ChessPosition(p.getRow() - 1, p.getColumn());
+            pNew = new ChessPosition(p.getRow() - 1, p.getColumn());
 
-            inTheWay = board.getPiece(p_new);
+            inTheWay = board.getPiece(pNew);
 
             boolean moveOne = false;
             if (inTheWay == null) {
-                if (p_new.getRow() == 1){
-                    p_moves.add(new ChessMove(p,p_new, ChessPiece.PieceType.QUEEN));
-                    p_moves.add(new ChessMove(p,p_new, ChessPiece.PieceType.BISHOP));
-                    p_moves.add(new ChessMove(p,p_new, ChessPiece.PieceType.ROOK));
-                    p_moves.add(new ChessMove(p,p_new, ChessPiece.PieceType.KNIGHT));
+                if (pNew.getRow() == 1){
+                    pMoves.add(new ChessMove(p,pNew, ChessPiece.PieceType.QUEEN));
+                    pMoves.add(new ChessMove(p,pNew, ChessPiece.PieceType.BISHOP));
+                    pMoves.add(new ChessMove(p,pNew, ChessPiece.PieceType.ROOK));
+                    pMoves.add(new ChessMove(p,pNew, ChessPiece.PieceType.KNIGHT));
                 } else {
-                    p_moves.add(new ChessMove(p,p_new, null));
+                    pMoves.add(new ChessMove(p,pNew, null));
                 }
                 moveOne = true;
             }
 
             if (!hasMoved) {
-                p_new = new ChessPosition(p.getRow() - 2, p.getColumn());
-                inTheWay = board.getPiece(p_new);
-                if (inTheWay == null && moveOne) { p_moves.add(new ChessMove(p,p_new,null)); }
+                pNew = new ChessPosition(p.getRow() - 2, p.getColumn());
+                inTheWay = board.getPiece(pNew);
+                if (inTheWay == null && moveOne) { pMoves.add(new ChessMove(p,pNew,null)); }
             }
 
-            // If there is a non-same color piece on the {1,1} or {-1,1} (because white's Johnson increases) add possibility.
-            int[][] pawn_takes = {{-1,1}, {-1,-1}};
+            int[][] pawnTakes = {{-1,1}, {-1,-1}};
 
-            for (int[] xy : pawn_takes) {
+            for (int[] xy : pawnTakes) {
                 int r = p.getRow() + xy[0];
                 int c = p.getColumn() + xy[1];
 
                 if (1 <= r && r <= 8 && 1 <= c && c <= 8) {
-                    p_new = new ChessPosition(r, c);
-                    inTheWay = board.getPiece(p_new);
+                    pNew = new ChessPosition(r, c);
+                    inTheWay = board.getPiece(pNew);
                     if (inTheWay != null && inTheWay.getTeamColor() == ChessGame.TeamColor.WHITE){
-                        if (p_new.getRow() == 1){
-                            p_moves.add(new ChessMove(p,p_new, ChessPiece.PieceType.QUEEN));
-                            p_moves.add(new ChessMove(p,p_new, ChessPiece.PieceType.BISHOP));
-                            p_moves.add(new ChessMove(p,p_new, ChessPiece.PieceType.ROOK));
-                            p_moves.add(new ChessMove(p,p_new, ChessPiece.PieceType.KNIGHT));
+                        if (pNew.getRow() == 1){
+                            pMoves.add(new ChessMove(p,pNew, ChessPiece.PieceType.QUEEN));
+                            pMoves.add(new ChessMove(p,pNew, ChessPiece.PieceType.BISHOP));
+                            pMoves.add(new ChessMove(p,pNew, ChessPiece.PieceType.ROOK));
+                            pMoves.add(new ChessMove(p,pNew, ChessPiece.PieceType.KNIGHT));
                         } else {
-                            p_moves.add(new ChessMove(p,p_new, null));
+                            pMoves.add(new ChessMove(p,pNew, null));
                         }
                     }
                 }
@@ -230,33 +229,33 @@ public class PieceMoves {
         }
 
 
-        return p_moves;
+        return pMoves;
     }
 
-    public static Collection<ChessMove> KnightMoves(ChessBoard board, ChessPosition p) {
-        ArrayList<ChessMove> kn_moves = new ArrayList<ChessMove>();
-        int[][] knight_possible_moves = {{-2,1},{-2,-1},{2,1},{2,-1},{1,2},{-1,2},{1,-2},{-1,-2}};
+    public static Collection<ChessMove> knightMoves(ChessBoard board, ChessPosition p) {
+        ArrayList<ChessMove> knMoves = new ArrayList<ChessMove>();
+        int[][] knightPossibleMoves = {{-2,1},{-2,-1},{2,1},{2,-1},{1,2},{-1,2},{1,-2},{-1,-2}};
 
-        ChessPosition p_new;
+        ChessPosition pNew;
 
-        for (int[] xy : knight_possible_moves) {
+        for (int[] xy : knightPossibleMoves) {
 
             int r = p.getRow() + xy[0];
 
             int c = p.getColumn() + xy[1];
 
             if (1 <= r && r <= 8 && 1 <= c && c <= 8) {
-                p_new = new ChessPosition(r, c);
-                ChessPiece inTheWay = board.getPiece(p_new);
+                pNew = new ChessPosition(r, c);
+                ChessPiece inTheWay = board.getPiece(pNew);
                 if (inTheWay == null) {
-                    kn_moves.add(new ChessMove(p,p_new,null));
+                    knMoves.add(new ChessMove(p,pNew,null));
                 } else if (inTheWay.getTeamColor() != board.getPiece(p).getTeamColor()) {
-                    kn_moves.add(new ChessMove(p,p_new,null));
+                    knMoves.add(new ChessMove(p,pNew,null));
                 }
             }
         }
 
-        return kn_moves;
+        return knMoves;
     }
 
 }

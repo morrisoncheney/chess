@@ -59,23 +59,23 @@ public class ChessPiece {
         ChessPiece piece = board.getPiece(myPosition);
 
         if (piece.type == PieceType.PAWN) {
-            moves = PieceMoves.PawnMoves(board, myPosition);
+            moves = PieceMoves.pawnMoves(board, myPosition);
 
         } else if (piece.type == PieceType.BISHOP) {
-            moves = PieceMoves.BishopMoves(board, myPosition);
+            moves = PieceMoves.bishopMoves(board, myPosition);
 
         } else if (piece.type == PieceType.ROOK) {
-            moves = PieceMoves.RookMoves(board, myPosition);
+            moves = PieceMoves.rookMoves(board, myPosition);
 
         } else if (piece.type == PieceType.KNIGHT) {
-            moves = PieceMoves.KnightMoves(board, myPosition);
+            moves = PieceMoves.knightMoves(board, myPosition);
 
         } else if (piece.type == PieceType.QUEEN) {
-            moves.addAll(PieceMoves.RookMoves(board, myPosition));
-            moves.addAll(PieceMoves.BishopMoves(board, myPosition));
+            moves.addAll(PieceMoves.rookMoves(board, myPosition));
+            moves.addAll(PieceMoves.bishopMoves(board, myPosition));
 
         } else if (piece.type == PieceType.KING) {
-            moves = PieceMoves.KingMoves(board, myPosition);
+            moves = PieceMoves.kingMoves(board, myPosition);
         }
 
         return moves;

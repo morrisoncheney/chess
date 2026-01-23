@@ -11,10 +11,6 @@ import java.util.Objects;
  */
 public class ChessBoard {
 
-//    public static void main (String[] args){
-//        ChessBoard board = new ChessBoard();
-//        board.addPiece();
-//    }
     ChessPiece[][] board;
 
     public ChessBoard() {
