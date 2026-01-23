@@ -12,8 +12,8 @@ public class ChessPosition {
     int row;
     int col;
     public ChessPosition(int row, int col) {
-        this.row = ( col * -1 ) + 8; // index
-        this.col = row - 1; // index
+        this.row = ( row * -1 ) + 8; // index
+        this.col = col - 1; // index
     }
 
     /**
@@ -21,7 +21,7 @@ public class ChessPosition {
      * 1 codes for the bottom row
      */
     public int getRow() {
-        return this.row + 1;
+        return (this.row - 8 ) * -1;
     }
 
     /**
@@ -29,7 +29,7 @@ public class ChessPosition {
      * 1 codes for the left row
      */
     public int getColumn() {
-        return (this.col - 8 ) * -1;
+        return this.col + 1 ;
     }
 
     @Override

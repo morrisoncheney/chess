@@ -59,46 +59,26 @@ public class ChessPiece {
         ChessPiece piece = board.getPiece(myPosition);
 
         if (piece.type == PieceType.PAWN) {
+            moves = PieceMoves.PawnMoves(board, myPosition);
 
         } else if (piece.type == PieceType.BISHOP) {
+            moves = PieceMoves.BishopMoves(board, myPosition);
 
         } else if (piece.type == PieceType.ROOK) {
+            moves = PieceMoves.RookMoves(board, myPosition);
 
         } else if (piece.type == PieceType.KNIGHT) {
+//            moves = PieceMoves.KnightMoves(board, myPosition);
 
         } else if (piece.type == PieceType.QUEEN) {
+            moves.addAll(PieceMoves.RookMoves(board, myPosition));
+            moves.addAll(PieceMoves.BishopMoves(board, myPosition));
 
         } else if (piece.type == PieceType.KING) {
-            moves = KingMoves(board, myPosition);
+            moves = PieceMoves.KingMoves(board, myPosition);
         }
 
         return moves;
-    }
-
-    private Collection<ChessMove> KingMoves(ChessBoard board, ChessPosition p) {
-        ArrayList<ChessMove> kmoves = new ArrayList<ChessMove>();
-        int[][] king_possible_moves = {{-1,0},{-1,1},{0,1},{1,1},{1,0},{1,-1},{0,-1},{-1,-1}};
-
-        ChessPosition p_new;
-
-        for (int[] xy : king_possible_moves) {
-
-            int r = p.getRow() + xy[0];
-
-            int c = p.getColumn() + xy[1];
-
-            if (1 <= r && r <= 8 && 1 <= c && c <= 8) {
-                p_new = new ChessPosition(r, c);
-                ChessPiece inTheWay = board.getPiece(p_new);
-                if (inTheWay == null) {
-                    kmoves.add(new ChessMove(p,p_new,null));
-                } else if (inTheWay.getTeamColor() != board.getPiece(p).getTeamColor()) {
-                    kmoves.add(new ChessMove(p,p_new,null));
-                }
-            }
-        }
-
-        return kmoves;
     }
 
 
