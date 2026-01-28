@@ -1,8 +1,8 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
-import java.util.ArrayList;
 
 /**
  * Represents a single chess piece
@@ -12,12 +12,12 @@ import java.util.ArrayList;
  */
 public class ChessPiece {
 
-    PieceType type;
     ChessGame.TeamColor color;
+    ChessPiece.PieceType type;
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
-        this.type = type;
         this.color = pieceColor;
+        this.type = type;
     }
 
     /**
@@ -54,46 +54,25 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        Collection<ChessMove> moves = new ArrayList<ChessMove>();
+        PieceType t = board.getPiece(myPosition).getPieceType();
+        ArrayList<ChessMove> moves = new ArrayList<>();
 
-        ChessPiece piece = board.getPiece(myPosition);
-
-        if (piece.type == PieceType.PAWN) {
-            moves = PieceMoves.pawnMoves(board, myPosition);
-
-        } else if (piece.type == PieceType.BISHOP) {
-            moves = PieceMoves.bishopMoves(board, myPosition);
-
-        } else if (piece.type == PieceType.ROOK) {
-            moves = PieceMoves.rookMoves(board, myPosition);
-
-        } else if (piece.type == PieceType.KNIGHT) {
-            moves = PieceMoves.knightMoves(board, myPosition);
-
-        } else if (piece.type == PieceType.QUEEN) {
-            moves.addAll(PieceMoves.rookMoves(board, myPosition));
-            moves.addAll(PieceMoves.bishopMoves(board, myPosition));
-
-        } else if (piece.type == PieceType.KING) {
-            moves = PieceMoves.kingMoves(board, myPosition);
+        if (t == PieceType.KING) {
+            moves = PieceMoves.kingMoves(myPosition, board);
+        } else if (t == PieceType.QUEEN) {
+            moves = PieceMoves.queenMoves(myPosition, board);
+        } else if (t == PieceType.BISHOP) {
+            moves = PieceMoves.bishopMoves(myPosition, board);
+        } else if (t == PieceType.KNIGHT) {
+            moves = PieceMoves.knightMoves(myPosition, board);
+        } else if (t == PieceType.ROOK) {
+            moves = PieceMoves.rookMoves(myPosition, board);
+        } else if (t == PieceType.PAWN) {
+            moves = PieceMoves.pawnMoves(myPosition, board);
         }
 
         return moves;
     }
-
-
-    // BISHOP: in 4 directions, using a while loop,
-    // add 1 to r and c, and once you hit another object stop moving in that direction.
-
-    // ROOK: Same as Bishop except different directions.
-
-    // KNIGHT: knowing the shape, check the indexes of the possible positions,
-    // and then add them to the list if they are empty.
-
-    // KING: Go over every possible change in indexes. Create an array of arrays with x y cords.
-
-    // Queen: BISHOP and ROOK
-
 
 
     @Override
@@ -102,19 +81,19 @@ public class ChessPiece {
             return false;
         }
         ChessPiece that = (ChessPiece) o;
-        return type == that.type && color == that.color;
+        return color == that.color && type == that.type;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(type, color);
+        return Objects.hash(color, type);
     }
 
     @Override
     public String toString() {
         return "ChessPiece{" +
-                "type=" + type +
-                ", color=" + color +
+                "color=" + color +
+                ", type=" + type +
                 '}';
     }
 }

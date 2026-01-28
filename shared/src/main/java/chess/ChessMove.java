@@ -10,29 +10,30 @@ import java.util.Objects;
  */
 public class ChessMove {
 
-    ChessPosition starting_pos;
-    ChessPosition ending_pos;
-    ChessPiece.PieceType promo_piece;
+    ChessPosition start;
+    ChessPosition end;
+    ChessPiece.PieceType promo;
 
     public ChessMove(ChessPosition startPosition, ChessPosition endPosition,
                      ChessPiece.PieceType promotionPiece) {
-        this.starting_pos = startPosition;
-        this.ending_pos = endPosition;
-        this.promo_piece = promotionPiece;
+        this.start = startPosition;
+        this.end = endPosition;
+        this.promo = promotionPiece;
     }
 
     /**
      * @return ChessPosition of starting location
      */
     public ChessPosition getStartPosition() {
-        return this.starting_pos;
+
+        return this.start;
     }
 
     /**
      * @return ChessPosition of ending location
      */
     public ChessPosition getEndPosition() {
-        return ending_pos;
+        return this.end;
     }
 
     /**
@@ -42,10 +43,10 @@ public class ChessMove {
      * @return Type of piece to promote a pawn to, or null if no promotion
      */
     public ChessPiece.PieceType getPromotionPiece() {
-        if (this.ending_pos.getRow() != 1 | this.ending_pos.getRow() != 8) {
-            return null;
+        if (this.end.getRow() == 1 || this.end.getRow() == 8){
+            return promo;
         } else {
-            return promo_piece;
+            return null;
         }
     }
 
@@ -55,20 +56,20 @@ public class ChessMove {
             return false;
         }
         ChessMove chessMove = (ChessMove) o;
-        return Objects.equals(starting_pos, chessMove.starting_pos) && Objects.equals(ending_pos, chessMove.ending_pos) && promo_piece == chessMove.promo_piece;
+        return Objects.equals(start, chessMove.start) && Objects.equals(end, chessMove.end) && promo == chessMove.promo;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(starting_pos, ending_pos, promo_piece);
+        return Objects.hash(start, end, promo);
     }
 
     @Override
     public String toString() {
         return "ChessMove{" +
-                "starting_pos=" + starting_pos +
-                ", ending_pos=" + ending_pos +
-                ", promo_piece=" + promo_piece +
+                "start=" + start +
+                ", end=" + end +
+                ", promo=" + promo +
                 '}';
     }
 }

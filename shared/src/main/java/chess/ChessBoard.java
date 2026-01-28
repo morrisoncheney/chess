@@ -42,44 +42,40 @@ public class ChessBoard {
      * Sets the board to the default starting board
      * (How the game of chess normally starts)
      */
+
+    private void rowIterator(int[] cols, ChessPiece.PieceType type){
+        for (int c: cols){ // add at 1 and 8
+            addPiece(new ChessPosition(1,c), new ChessPiece(ChessGame.TeamColor.WHITE, type));
+            addPiece(new ChessPosition(8,c), new ChessPiece(ChessGame.TeamColor.BLACK, type));
+        }
+    }
+
     public void resetBoard() {
+        int[] pawns = {1,2,3,4,5,6,7,8};
 
-        ChessPiece[][] board = new ChessPiece[8][8];
-        int[] pawns = new int[] {1,2,3,4,5,6,7,8};
-
-        for (int n : pawns) {
-                addPiece(new ChessPosition(2, n), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN));
-                addPiece(new ChessPosition(7, n), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
+        for (int c : pawns){
+            addPiece(new ChessPosition(2,c), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN));
+            addPiece(new ChessPosition(7,c), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
         }
 
-        int[] rooks = new int[] {1,8};
-        row_iterator(ChessPiece.PieceType.ROOK, rooks);
+        int[] rooks = {1,8};
+        rowIterator(rooks, ChessPiece.PieceType.ROOK);
 
-        int[] bishops = new int[] {3,6};
-        row_iterator(ChessPiece.PieceType.BISHOP, bishops);
+        int[] knights = {2,7};
+        rowIterator(knights, ChessPiece.PieceType.KNIGHT);
 
-        int[] knights = new int[] {2,7};
-        row_iterator(ChessPiece.PieceType.KNIGHT, knights);
 
-        int[] kings = new int[] {5};
-        row_iterator(ChessPiece.PieceType.KING, kings);
+        int[] bishops = {3,6};
+        rowIterator(bishops, ChessPiece.PieceType.BISHOP);
 
-        int[] queens = new int[] {4};
-        row_iterator(ChessPiece.PieceType.QUEEN, queens);
+        int[] queens = {4};
+        rowIterator(queens, ChessPiece.PieceType.QUEEN);
+
+        int[] kings = {5};
+        rowIterator(kings, ChessPiece.PieceType.KING);
+
     }
 
-    /**
-     * iterates through rows on front and back rank to add pieces.
-     *
-     * @param type The ChessPiece.PieceType of your pieces.
-     * @param cols An integer array of the column indexes to add them to.
-     */
-    private void row_iterator(ChessPiece.PieceType type, int[] cols){
-        for (int n : cols) {
-                addPiece(new ChessPosition(1, n), new ChessPiece(ChessGame.TeamColor.WHITE, type));
-                addPiece(new ChessPosition(8, n), new ChessPiece(ChessGame.TeamColor.BLACK, type));
-        }
-    }
 
     @Override
     public boolean equals(Object o) {
@@ -102,6 +98,3 @@ public class ChessBoard {
                 '}';
     }
 }
-
-
-// create a chess piece class, and the board should be an array of this chess piece thing.
