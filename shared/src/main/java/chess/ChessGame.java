@@ -143,15 +143,10 @@ public class ChessGame {
         ChessPosition currPos;
         ChessPosition kingPos = null;
 
-        // Scan board
         for (int row = 1; row < 9; row += 1) {
-//            System.out.println("{DEBUG} r:" + row);
             for (int col = 1; col < 9; col += 1) {
-//                System.out.println("{DEBUG} c:" + col);
                 currPos = new ChessPosition(row, col);
-//                System.out.println("{DEBUG} current position:" + currPos);
                 currPiece = checkBoard.getPiece(currPos);
-//                System.out.println("{DEBUG} current piece:" + currPiece);
                 if (currPiece != null) {
                     if (currPiece.getTeamColor() == color && currPiece.getPieceType() == ChessPiece.PieceType.KING){
                         kingPos = new ChessPosition(currPos.getRow(), currPos.getColumn());
@@ -163,14 +158,10 @@ public class ChessGame {
         }
 
         if (kingPos == null) {
-//            System.out.println("[DEBUG] CRITICAL: King not found for " + color); // DEBUG
             return false;
         }
-//        System.out.println("{DEBUG} King Position: " + kingPos);
         for (ChessMove move: opMoves){
-//            System.out.println("{DEBUG} Testing: " + move);
             if (move.getEndPosition().equals(kingPos)) {
-//                System.out.println("[DEBUG] CHECK DETECTED! King at " + kingPos + " threatened by " + move.getStartPosition()); // DEBUG
                 return true;
             }
         }
