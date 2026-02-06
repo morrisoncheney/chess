@@ -84,31 +84,23 @@ public class ChessGame {
     }
 
     public void makeMove(ChessMove move) throws InvalidMoveException {
-//        System.out.println("\n[DEBUG] --- makeMove called ---"); // DEBUG
-//        System.out.println("[DEBUG] Attempting to move: " + move); // DEBUG
 
         ChessPiece p = this.board.getPiece(move.getStartPosition());
         if (p == null) {
-//            System.out.println("[DEBUG] ERROR: No piece at start position"); // DEBUG
             throw new InvalidMoveException("You cannot move a nonexistent piece.");
         } else if (p.getTeamColor() != currentTurn) {
             throw new InvalidMoveException("It is not this team's turn.");
         }
 
         TeamColor c = p.getTeamColor();
-        // Verify turn order here if you have access to game state
-        // System.out.println("[DEBUG] Piece color: " + c);
 
         ChessBoard tempBoard = new ChessBoard();
         tempBoard.set(this.board);
         tempBoard = executeMove(tempBoard, move);
 
-        // DEBUG: Checking if move is in validMoves
-//        System.out.println("[DEBUG] Verifying move against validMoves list..."); // DEBUG
         Collection<ChessMove> valid = validMoves(move.getStartPosition());
 
         if (valid.contains(move)){
-//            System.out.println("[DEBUG] Move confirmed valid. Updating board."); // DEBUG
             this.board = tempBoard;
         } else {
             throw new InvalidMoveException("Invalid move attempted.");
