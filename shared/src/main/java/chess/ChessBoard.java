@@ -76,6 +76,76 @@ public class ChessBoard {
 
     }
 
+    /**
+     * Resets the board to input board
+     *
+     * @param board
+     */
+    public void set(ChessBoard board) {
+        ChessPosition p;
+        for (int row = 1; row < 9; row += 1) {
+            for (int col = 1; col < 9; col += 1) {
+                p = new ChessPosition(row,col);
+                ChessPiece pc = board.getPiece(p);
+                if (pc != null) {
+                    addPiece(p, new ChessPiece(pc.getTeamColor(), pc.getPieceType()));
+                }
+            }
+        }
+    }
+
+    private String getPieceChar(ChessPiece piece) {
+        if (piece == null) {
+            return " "; // Empty square
+        }
+
+        String letter = "";
+        // Determine the letter based on the type
+        switch (piece.getPieceType()) {
+            case KING -> letter = "K";
+            case QUEEN -> letter = "Q";
+            case BISHOP -> letter = "B";
+            case KNIGHT -> letter = "N";
+            case ROOK -> letter = "R";
+            case PAWN -> letter = "P";
+        }
+
+        // If it's Dr. Evil's team (Black), lower the case!
+        if (piece.getTeamColor() == ChessGame.TeamColor.BLACK) {
+            return letter.toLowerCase();
+        } else {
+            return letter; // White pieces stand tall and uppercase
+        }
+    }
+
+    public void printBoard() {
+        System.out.println("\n  -------------------------");
+        // Start from Row 8 (top) down to Row 1 (bottom)
+        for (int row = 8; row >= 1; row--) {
+            System.out.print("\n"+row + " |"); // Print the row number
+            for (int col = 1; col <= 9; col++) {
+                // Wait! The loop should be 1 to 8, but let's be safe
+                if (col > 8) break;
+
+                ChessPiece piece = getPiece(new ChessPosition(row, col));
+                System.out.print(getPieceChar(piece) + "|");
+            }
+//            System.out.println("\n");
+        }
+        System.out.println("-------------------------");
+//        System.out.println("   a  b  c  d  e  f  g  h"); // Print column letters
+    }
+
+    public void clear(){
+        for (int r = 1; r < 9; r +=1){
+            for (int c = 1; c < 9; c +=1){
+                addPiece(new ChessPosition(r,c), null);
+            }
+        }
+    }
+
+
+
 
     @Override
     public boolean equals(Object o) {
