@@ -111,8 +111,6 @@ public class ChessGame {
 //            System.out.println("[DEBUG] Move confirmed valid. Updating board."); // DEBUG
             this.board = tempBoard;
         } else {
-//            System.out.println("[DEBUG] ERROR: Move not in validMoves list!"); // DEBUG
-//            System.out.println("[DEBUG] Valid moves were: " + valid); // DEBUG
             throw new InvalidMoveException("Invalid move attempted.");
         }
         if (p.getTeamColor() == TeamColor.WHITE){
@@ -123,12 +121,10 @@ public class ChessGame {
     }
 
     private ChessBoard executeMove(ChessBoard currBoard, ChessMove move){
-        // System.out.println("[DEBUG] Executing move on board state..."); // DEBUG
         ChessPiece piece = currBoard.getPiece(move.getStartPosition());
         currBoard.addPiece(move.getStartPosition(), null);
 
         if(move.getPromotionPiece() != null) {
-            // System.out.println("[DEBUG] PROMOTION detected to " + move.getPromotionPiece()); // DEBUG
             currBoard.addPiece(move.getEndPosition(), new ChessPiece(piece.getTeamColor(), move.getPromotionPiece()));
         } else {
             currBoard.addPiece(move.getEndPosition(), piece);
@@ -137,7 +133,6 @@ public class ChessGame {
     }
 
     private boolean iterativeCheckFinder(ChessBoard checkBoard, TeamColor color){
-        // System.out.println("[DEBUG] CheckFinder checking " + color); // DEBUG
         ChessPiece currPiece;
         ArrayList<ChessMove> opMoves = new ArrayList<>();
         ChessPosition currPos;
