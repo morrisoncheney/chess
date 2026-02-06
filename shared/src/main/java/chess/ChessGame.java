@@ -32,11 +32,6 @@ public class ChessGame {
      * @param team the team whose turn it is
      */
     public void setTeamTurn(TeamColor team) {
-//        if (currentTurn == TeamColor.WHITE) {
-//            currentTurn =  TeamColor.BLACK;
-//        } else {
-//            currentTurn =  TeamColor.WHITE;
-//        }
         currentTurn = team;
     }
 
@@ -49,37 +44,25 @@ public class ChessGame {
     }
 
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-//        System.out.println("[DEBUG] validMoves called for " + startPosition); // DEBUG
 
         ChessPiece p = this.board.getPiece(startPosition);
         if (p == null) {
-//            System.out.println("[DEBUG] No piece found at " + startPosition); // DEBUG
             return null;
         }
-//        System.out.println("[DEBUG] Piece is: " + p.getPieceType() + " (" + p.getTeamColor() + ")"); // DEBUG
 
         ArrayList<ChessMove> moves = new ArrayList<>();
         Collection<ChessMove> pMoves = p.pieceMoves(this.board, startPosition);
 
-//        System.out.println("[DEBUG] Raw pieceMoves found: " + pMoves.size()); // DEBUG
-
-//        this.board.printBoard();
-
         for (ChessMove move: pMoves) {
-            // System.out.println("[DEBUG] Testing move validity: " + move); // Optional: can be noisy
             ChessBoard tempBoard = new ChessBoard();
             tempBoard.set(this.board);
             executeMove(tempBoard, move);
-//            tempBoard.printBoard();
             boolean checkFound = iterativeCheckFinder(tempBoard, p.getTeamColor());
             if (!checkFound){
-                // System.out.println("[DEBUG] Move VALID: " + move); // Optional
                 moves.add(move);
             } else {
-//                System.out.println("[DEBUG] Move BLOCKED by check: " + move); // DEBUG
             }
         }
-//        System.out.println("[DEBUG] Total valid moves returning: " + moves.size()); // DEBUG
         return moves;
     }
 
