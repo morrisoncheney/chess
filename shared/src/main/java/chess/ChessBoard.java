@@ -94,28 +94,6 @@ public class ChessBoard {
         }
     }
 
-    private String getPieceChar(ChessPiece piece) {
-        if (piece == null) {
-            return " ";
-        }
-
-        String letter = "";
-        switch (piece.getPieceType()) {
-            case KING -> letter = "K";
-            case QUEEN -> letter = "Q";
-            case BISHOP -> letter = "B";
-            case KNIGHT -> letter = "N";
-            case ROOK -> letter = "R";
-            case PAWN -> letter = "P";
-        }
-
-        if (piece.getTeamColor() == ChessGame.TeamColor.BLACK) {
-            return letter.toLowerCase();
-        } else {
-            return letter;
-        }
-    }
-
     public void clear(){
         for (int r = 1; r < 9; r +=1){
             for (int c = 1; c < 9; c +=1){
@@ -123,9 +101,6 @@ public class ChessBoard {
             }
         }
     }
-
-
-
 
     @Override
     public boolean equals(Object o) {
