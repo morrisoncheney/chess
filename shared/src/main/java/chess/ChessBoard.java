@@ -116,19 +116,6 @@ public class ChessBoard {
         }
     }
 
-    public void printBoard() {
-        System.out.println("\n-------------------------");
-        for (int row = 8; row >= 1; row--) {
-            System.out.print("\n"+row + " |");
-            for (int col = 1; col < 9; col++) {
-
-                ChessPiece piece = getPiece(new ChessPosition(row, col));
-                System.out.print(getPieceChar(piece) + "|");
-            }
-        }
-        System.out.println("-------------------------");
-    }
-
     public void clear(){
         for (int r = 1; r < 9; r +=1){
             for (int c = 1; c < 9; c +=1){

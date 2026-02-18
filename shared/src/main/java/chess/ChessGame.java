@@ -171,8 +171,7 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        if (allValidMoves(teamColor).isEmpty() && iterativeCheckFinder(this.board, teamColor)) return true;
-        return false;
+        return allValidMoves(teamColor).isEmpty() && iterativeCheckFinder(this.board, teamColor);
     }
 
     /**
@@ -183,8 +182,7 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        if (allValidMoves(teamColor).isEmpty() && !iterativeCheckFinder(this.board, teamColor)) return true;
-        return false;
+        return allValidMoves(teamColor).isEmpty() && !iterativeCheckFinder(this.board, teamColor);
     }
 
     /**
