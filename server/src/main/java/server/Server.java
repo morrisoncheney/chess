@@ -56,6 +56,11 @@ public class Server {
             context.json(Map.of("Error", e.getMessage()));
         });
 
+        javalin.exception(IllegalArgumentException.class, (e, context) -> {
+            context.status(403); // 400 means "Bad Request" (the user messed up)
+            context.json(Map.of("Error", e.getMessage()));
+        });
+
 
 
     }
