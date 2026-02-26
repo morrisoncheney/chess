@@ -51,6 +51,10 @@ public class Server {
             context.status(400); // 400 means "Bad Request" (the user messed up)
             context.json(Map.of("Error", e.getMessage()));
         });
+        javalin.exception(BadRequestException.class, (e, context) -> {
+            context.status(403); // 400 means "Bad Request" (the user messed up)
+            context.json(Map.of("Error", e.getMessage()));
+        });
 
 
 
