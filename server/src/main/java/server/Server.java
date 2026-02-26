@@ -11,6 +11,10 @@ public class Server {
 
     private final Javalin javalin;
 
+    private final UserHandler userHandler = new UserHandler();
+
+    // add other handler types in here as needed
+
     public Server() {
 
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
