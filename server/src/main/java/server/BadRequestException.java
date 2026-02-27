@@ -1,7 +1,7 @@
 package server;
 
-public class MissingArgumentException extends RuntimeException {
-    public MissingArgumentException(String message) {
+public class BadRequestException extends RuntimeException {
+    public BadRequestException(String message) {
         super(message);
     }
     // this may not be necessary

@@ -17,11 +17,11 @@ public class MemoryDataAccess {
 //    public PetList listPets() {return new PetList(users.values());}
 //    I don't think I need a UserList or anything like that.
 
-    public UserData getUserData(String username) {
+    public UserData getUser(String username) {
         return users.get(username);
     }
 
-    public void deleteUserData(String username) {
+    public void deleteUser(String username) {
         users.remove(username);
     }
 

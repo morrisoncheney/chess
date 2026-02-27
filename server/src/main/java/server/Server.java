@@ -1,8 +1,12 @@
 package server;
 
+import com.google.gson.Gson;
+import dataaccess.MemoryDataAccess;
 import io.javalin.*;
 import io.javalin.http.Context;
+import org.jetbrains.annotations.NotNull;
 import server.handlers.UserHandler;
+import service.Service;
 
 import java.util.Map;
 
@@ -11,7 +15,7 @@ public class Server {
 
     private final Javalin javalin;
 
-    private final UserHandler userHandler = new UserHandler();
+    private final UserHandler userHandler = new UserHandler(new Service(new MemoryDataAccess()));
 
     // add other handler types in here as needed
 
@@ -19,21 +23,23 @@ public class Server {
 
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
                 .post("/user", this::register)
-//                .delete("/db", this::clear)
+                //.delete("/db", this::clear)
 //                .post("/session",this::login)
 //                .delete("/session",this::logout)
 //                .get("/game",this::getGames)
 //                .post("/game",this::createGame)
 //                .put("/game",this::joinGame)
+                .error(404, this::notFound)
                     ;
 
-
-//        javalin = Javalin.create(config -> {
-//                    config.staticFiles.add("/web", io.javalin.http.staticfiles.Location.CLASSPATH);
-//                })
-//                .post("/user", this::register);
-
         addExceptions();
+
+    }
+
+    private void notFound(Context context){
+        Error e = new Error("File not found");
+        context.status(404);
+        context.json(new Gson().toJson(Map.of("Error:", e.getMessage())));
 
     }
 
@@ -47,25 +53,27 @@ public class Server {
     }
 
     private void register(Context context){
-        UserHandler.register(context);
+        this.userHandler.register(context);
     }
 
     private void addExceptions(){
-        javalin.exception(IllegalArgumentException.class, (e, context) -> {
-            context.status(400); // 400 means "Bad Request" (the user messed up)
-            context.json(Map.of("Error", e.getMessage()));
-        });
+
         javalin.exception(BadRequestException.class, (e, context) -> {
-            context.status(403); // 400 means "Bad Request" (the user messed up)
-            context.json(Map.of("Error", e.getMessage()));
+            context.status(400);
+            context.json(new Gson().toJson(Map.of("Error:", e.getMessage())));
         });
 
         javalin.exception(IllegalArgumentException.class, (e, context) -> {
-            context.status(403); // 400 means "Bad Request" (the user messed up)
-            context.json(Map.of("Error", e.getMessage()));
+            context.status(403);
+            context.json(new Gson().toJson(Map.of("Error:", e.getMessage())));
         });
 
-
+        javalin.exception(Exception.class, (e, context) -> {
+            context.status(500);
+            context.json(new Gson().toJson(Map.of("Error:", e.getMessage())));
+        });
 
     }
+
+
 }
