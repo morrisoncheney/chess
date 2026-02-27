@@ -28,4 +28,25 @@ public class MemoryDataAccess {
     public void deleteAllUserData() {
         users.clear();
     }
+
+
+    public AuthData addAuth(AuthData auth) {
+        auth = new AuthData(auth.authToken(), auth.username());
+
+        auths.put(auth.authToken(), auth);
+        return auth;
+    }
+
+    public AuthData getAuth(String authToken) {
+        return auths.get(authToken);
+    }
+
+    public void deleteAuth(String authToken) {
+        auths.remove(authToken);
+    }
+
+    public void deleteAllAuthData() {
+        auths.clear();
+    }
+
 }
