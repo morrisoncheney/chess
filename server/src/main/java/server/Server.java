@@ -25,7 +25,7 @@ public class Server {
 
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
                 .post("/user", this::register)
-                //.delete("/db", this::clear)
+                .delete("/db", this::clear)
 //                .post("/session",this::login)
 //                .delete("/session",this::logout)
 //                .get("/game",this::getGames)
@@ -56,6 +56,10 @@ public class Server {
 
     private void register(Context context){
         this.userHandler.register(context);
+    }
+
+    private void clear(Context context) {
+        this.userHandler.clear(context);
     }
 
     private void addExceptions(){

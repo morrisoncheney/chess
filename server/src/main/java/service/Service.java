@@ -17,7 +17,7 @@ public class Service {
     }
 
     public AuthData registerRequest(UserData user){
-//        user.check();
+        user.check();
 
         checkForUser(user); // Throws an error if exists.
 
@@ -48,6 +48,15 @@ public class Service {
 
     public static String generateToken() {
         return UUID.randomUUID().toString();
+    }
+
+    public Integer memorySelfDestruct(){
+
+        dataAccess.deleteAllUserData();
+        dataAccess.deleteAllAuthData();
+        dataAccess.deleteAllGames();
+        
+        return null;
     }
 
 }

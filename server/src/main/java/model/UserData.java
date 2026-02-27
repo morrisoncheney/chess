@@ -8,11 +8,15 @@ import java.util.Objects;
 
 public record UserData(String username, String password, String email) {
 
-//    public void check(){
-//        if (Objects.equals(this.username(), "") || Objects.equals(this.email(), "")){
-//            throw new BadRequestException("Username, and email cannot be null");
-//        }
-//    }
+    public void check(){
+        try {
+            if (this.username().isEmpty() || this.password.isEmpty() || this.email().isEmpty()) {
+                throw new Exception("you can't see me");
+            }
+        } catch (Exception e) {
+            throw new BadRequestException("bad request");
+        }
+    }
 
 //    @NotNull
     public String toString() {

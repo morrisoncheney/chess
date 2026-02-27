@@ -19,8 +19,9 @@ public class UserHandler {
 
 
     public void register(Context ctx) {
-        // Convert body json to object
+
         UserData user;
+
         try {
             user = new Gson().fromJson(ctx.body(), UserData.class);
         } catch (Error e) {
@@ -34,4 +35,9 @@ public class UserHandler {
         ctx.json(json);
     }
 
+    public void clear(Context ctx) {
+        Integer returned = this.service.memorySelfDestruct();
+        String json = new Gson().toJson(returned);
+        ctx.json(json);
+    }
 }
