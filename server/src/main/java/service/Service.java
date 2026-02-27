@@ -1,7 +1,12 @@
 package service;
 
 import dataaccess.MemoryDataAccess;
+import io.javalin.http.ForbiddenResponse;
+import io.javalin.http.UnauthorizedResponse;
+import model.AuthData;
 import model.UserData;
+import java.util.UUID;
+
 
 public class Service {
 
@@ -11,18 +16,38 @@ public class Service {
         this.dataAccess = dataAccess;
     }
 
-    public UserData registerRequest(UserData user){
-        user.check();
+    public AuthData registerRequest(UserData user){
+//        user.check();
 
-        checkForUser(user);
+        checkForUser(user); // Throws an error if exists.
 
-        return new UserData("","","");
+        dataAccess.addUser(user);
+
+        String authToken = generateToken();
+
+        AuthData auth = new AuthData(user.username(), authToken);
+
+        dataAccess.addAuth(auth);
+
+        return auth;
     }
 
     public void checkForUser(UserData user){
         UserData currentUser = dataAccess.getUser(user.username());
         if (currentUser != null) {
-            throw new IllegalArgumentException("Username already taken.");
+            throw new ForbiddenResponse("already taken");
         }
     }
+
+    public void authenticate(String authToken) throws Exception {
+        AuthData auth = dataAccess.getAuth(authToken);
+        if (auth == null) {
+            throw new UnauthorizedResponse("unauthorized");
+        }
+    }
+
+    public static String generateToken() {
+        return UUID.randomUUID().toString();
+    }
+
 }

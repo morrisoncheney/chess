@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import dataaccess.MemoryDataAccess;
 import io.javalin.*;
 import io.javalin.http.Context;
+import io.javalin.http.ForbiddenResponse;
+import io.javalin.http.UnauthorizedResponse;
 import org.jetbrains.annotations.NotNull;
 import server.handlers.UserHandler;
 import service.Service;
@@ -60,17 +62,22 @@ public class Server {
 
         javalin.exception(BadRequestException.class, (e, context) -> {
             context.status(400);
-            context.json(new Gson().toJson(Map.of("Error:", e.getMessage())));
+            context.json(new Gson().toJson(Map.of("message", "Error: " + e.getMessage())));
         });
 
-        javalin.exception(IllegalArgumentException.class, (e, context) -> {
+        javalin.exception(UnauthorizedResponse.class, (e, context) -> {
+            context.status(401);
+            context.json(new Gson().toJson(Map.of("message", "Error: " + e.getMessage())));
+        });
+
+        javalin.exception(ForbiddenResponse.class, (e, context) -> {
             context.status(403);
-            context.json(new Gson().toJson(Map.of("Error:", e.getMessage())));
+            context.json(new Gson().toJson(Map.of("message", "Error: " + e.getMessage())));
         });
 
         javalin.exception(Exception.class, (e, context) -> {
             context.status(500);
-            context.json(new Gson().toJson(Map.of("Error:", e.getMessage())));
+            context.json(new Gson().toJson(Map.of("message", "Error: " + e.getMessage())));
         });
 
     }

@@ -1,11 +1,13 @@
 package dataaccess;
 
+import model.AuthData;
 import model.UserData;
 
 import java.util.HashMap;
 
 public class MemoryDataAccess {
     final private HashMap<String, UserData> users = new HashMap<>();
+    final private HashMap<String, AuthData> auths = new HashMap<>();
 
     public UserData addUser(UserData user) {
         user = new UserData(user.username(), user.password(), user.email());
@@ -30,6 +32,7 @@ public class MemoryDataAccess {
     }
 
 
+
     public AuthData addAuth(AuthData auth) {
         auth = new AuthData(auth.authToken(), auth.username());
 
@@ -48,5 +51,8 @@ public class MemoryDataAccess {
     public void deleteAllAuthData() {
         auths.clear();
     }
+
+
+
 
 }
