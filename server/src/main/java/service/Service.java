@@ -4,6 +4,8 @@ import dataaccess.MemoryDataAccess;
 import io.javalin.http.ForbiddenResponse;
 import io.javalin.http.UnauthorizedResponse;
 import model.AuthData;
+import model.LoginRequest;
+import model.LogoutRequest;
 import model.UserData;
 import java.util.UUID;
 
@@ -32,6 +34,35 @@ public class Service {
         return auth;
     }
 
+    public AuthData loginRequest(LoginRequest log) {
+        log.check();
+
+        UserData currentUser = dataAccess.getUser(log.username());
+        if (currentUser == null) {
+            throw new ForbiddenResponse("unauthorized");
+        }
+
+        String authToken = generateToken();
+
+        AuthData auth = new AuthData(log.username(), authToken);
+
+        dataAccess.addAuth(auth);
+
+        return auth;
+    }
+
+    public void logoutRequest(LogoutRequest log) {
+        log.check();
+
+        UserData currentUser = dataAccess.getUser(log.authToken());
+        if (currentUser == null) {
+            throw new ForbiddenResponse("unauthorized");
+        }
+
+        dataAccess.deleteAuth(log.authToken());
+
+    }
+
     public void checkForUser(UserData user){
         UserData currentUser = dataAccess.getUser(user.username());
         if (currentUser != null) {
@@ -58,5 +89,7 @@ public class Service {
         
         return null;
     }
+
+
 
 }
