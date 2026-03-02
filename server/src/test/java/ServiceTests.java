@@ -1,15 +1,13 @@
-package unittests;
-
 import dataaccess.MemoryDataAccess;
 import model.AuthData;
 import model.LoginRequest;
 import model.UserData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import service.Service;
 import server.BadRequestException;
 import io.javalin.http.ForbiddenResponse;
 import io.javalin.http.UnauthorizedResponse;
+import service.Service;
 
 import static org.junit.jupiter.api.Assertions.*;
 
