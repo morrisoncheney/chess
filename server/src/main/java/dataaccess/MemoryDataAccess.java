@@ -56,7 +56,7 @@ public class MemoryDataAccess {
 
     public Integer addGame(String gameName) {
         nextId++;
-        GameData game = new GameData(nextId, new ChessGame(), "null", "null", gameName);
+        GameData game = new GameData(nextId, new ChessGame(), null, null, gameName);
 
         games.put(nextId, game);
 

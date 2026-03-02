@@ -84,10 +84,10 @@ public class Service {
 
         GameData game = dataAccess.getGame(gameID);
 
-        if (request.color() == ChessGame.TeamColor.WHITE && game.whiteUsername().equals("null")) {
-            dataAccess.replaceUser(request.color(), username, gameID);
-        } else if (game.blackUsername().equals("null")) {
-            dataAccess.replaceUser(request.color(), username, gameID);
+        if (request.playerColor() == ChessGame.TeamColor.WHITE && game.whiteUsername() == null) {
+            dataAccess.replaceUser(request.playerColor(), username, gameID);
+        } else if (game.blackUsername() == null) {
+            dataAccess.replaceUser(request.playerColor(), username, gameID);
         } else {
             throw new ForbiddenResponse("already taken");
         }
