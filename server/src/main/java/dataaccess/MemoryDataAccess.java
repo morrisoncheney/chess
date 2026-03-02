@@ -2,15 +2,16 @@ package dataaccess;
 
 import chess.ChessGame;
 import model.AuthData;
-import model.MemoryGame;
+import model.GameData;
 import model.UserData;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class MemoryDataAccess {
     final private HashMap<String, UserData> users = new HashMap<>();
     final private HashMap<String, AuthData> auths = new HashMap<>();
-    final private HashMap<String, MemoryGame> games = new HashMap<>();
+    final private HashMap<String, GameData> games = new HashMap<>();
 
     private int nextId = 1234;
 
@@ -64,8 +65,25 @@ public class MemoryDataAccess {
         return 67;
     }
 
-    public MemoryGame getGame(String gameId) {
+    public GameData getGame(String gameId) {
         return games.get(gameId);
+    }
+
+    public ArrayList<String> getGameList(){
+
+        ArrayList<String> gameList = new ArrayList<>();
+
+        for (GameData game : games.values()) {
+            gameList.add(game.toJsonString());
+        }
+        return gameList;
+
+    }
+
+    public void updateGame(String gameID, ChessGame game) {
+
+        games.repalce(gameID, games.get(gameID).update(game));
+
     }
 
     public void deleteGame(String gameId) {

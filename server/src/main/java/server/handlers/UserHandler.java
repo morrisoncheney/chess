@@ -58,7 +58,7 @@ public class UserHandler {
         LogoutRequest log;
 
         try {
-            log = new Gson().fromJson(ctx.body(), LogoutRequest.class);
+            log = new LogoutRequest(ctx.headerMap().get("authToken"));
         } catch (Error e) {
             throw new BadRequestException("bad request");
         }

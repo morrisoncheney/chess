@@ -39,7 +39,7 @@ public class Service {
 
         UserData currentUser = dataAccess.getUser(log.username());
         if (currentUser == null) {
-            throw new ForbiddenResponse("unauthorized");
+            throw new UnauthorizedResponse("unauthorized");
         }
 
         String authToken = generateToken();
@@ -54,9 +54,9 @@ public class Service {
     public void logoutRequest(LogoutRequest log) {
         log.check();
 
-        UserData currentUser = dataAccess.getUser(log.authToken());
-        if (currentUser == null) {
-            throw new ForbiddenResponse("unauthorized");
+        AuthData currAuth = dataAccess.getAuth(log.authToken());
+        if (currAuth == null) {
+            throw new UnauthorizedResponse("unauthorized");
         }
 
         dataAccess.deleteAuth(log.authToken());
