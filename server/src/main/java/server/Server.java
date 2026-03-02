@@ -7,7 +7,7 @@ import io.javalin.http.Context;
 import io.javalin.http.ForbiddenResponse;
 import io.javalin.http.UnauthorizedResponse;
 import org.jetbrains.annotations.NotNull;
-import server.handlers.UserHandler;
+import server.handlers.Handler;
 import service.Service;
 
 import java.util.Map;
@@ -17,7 +17,7 @@ public class Server {
 
     private final Javalin javalin;
 
-    private final UserHandler userHandler = new UserHandler(new Service(new MemoryDataAccess()));
+    private final Handler handler = new Handler(new Service(new MemoryDataAccess()));
 
     // add other handler types in here as needed
 
@@ -28,9 +28,9 @@ public class Server {
                 .delete("/db", this::clear)
                 .post("/session",this::login)
                 .delete("/session",this::logout)
-//                .get("/game",this::getGames)
-//                .post("/game",this::createGame)
-//                .put("/game",this::joinGame)
+                .get("/game",this::listGames)
+                .post("/game",this::createGame)
+                .put("/game",this::joinGame)
                 .error(404, this::notFound)
                     ;
 
@@ -55,20 +55,31 @@ public class Server {
     }
 
     private void register(Context context){
-        this.userHandler.register(context);
+        this.handler.register(context);
     }
 
     private void login(Context context){
-        this.userHandler.login(context);
+        this.handler.login(context);
     }
 
     private void logout(Context context){
-        this.userHandler.logout(context);
+        this.handler.logout(context);
     }
 
+    private void createGame(Context context) {
+        this.handler.createGame(context);
+    }
+
+    private void listGames(Context context) {
+        this.handler.getGames(context);
+    }
+
+    private void joinGame(Context context) {
+        this.handler.joinGame(context);
+    }
 
     private void clear(Context context) {
-        this.userHandler.clear(context);
+        this.handler.clear(context);
     }
 
     private void addExceptions(){

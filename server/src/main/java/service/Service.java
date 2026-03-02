@@ -1,12 +1,16 @@
 package service;
 
+import chess.ChessGame;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import dataaccess.MemoryDataAccess;
 import io.javalin.http.ForbiddenResponse;
 import io.javalin.http.UnauthorizedResponse;
-import model.AuthData;
-import model.LoginRequest;
-import model.LogoutRequest;
-import model.UserData;
+import model.*;
+import server.BadRequestException;
+
+import java.util.ArrayList;
+import java.util.Objects;
 import java.util.UUID;
 
 
@@ -37,7 +41,11 @@ public class Service {
     public AuthData loginRequest(LoginRequest log) {
         log.check();
 
-        findUser(log.username());
+        UserData user = findUser(log.username());
+
+        if (!Objects.equals(user.password(), log.password())){
+            throw new UnauthorizedResponse("unauthorized");
+        }
 
         String authToken = generateToken();
 
@@ -48,16 +56,41 @@ public class Service {
         return auth;
     }
 
-    public void logoutRequest(LogoutRequest log) {
-        log.check();
-
-        AuthData currAuth = dataAccess.getAuth(log.authToken());
-        if (currAuth == null) {
-            throw new UnauthorizedResponse("unauthorized");
+    public void logoutRequest(String auth) {
+        try {
+            if (auth.isEmpty()) {
+                throw new Exception("sugma");
+            }
+        } catch (Exception e) {
+            throw new BadRequestException("bad request");
         }
 
-        dataAccess.deleteAuth(log.authToken());
+        authenticate(auth);
 
+        dataAccess.deleteAuth(auth);
+
+    }
+
+    public Integer createGame(String gameName){
+        return dataAccess.addGame(gameName);
+    }
+
+    public ArrayList<GameDataListItem> getGameList() {
+        return dataAccess.getGameList();
+    }
+
+    public void joinGame(JoinGameRequest request, String username) {
+        Integer gameID = request.gameID();
+
+        GameData game = dataAccess.getGame(gameID);
+
+        if (request.color() == ChessGame.TeamColor.WHITE && game.whiteUsername().equals("null")) {
+            dataAccess.replaceUser(request.color(), username, gameID);
+        } else if (game.blackUsername().equals("null")) {
+            dataAccess.replaceUser(request.color(), username, gameID);
+        } else {
+            throw new ForbiddenResponse("already taken");
+        }
     }
 
     public void checkUserDNE(UserData user){
@@ -67,18 +100,20 @@ public class Service {
         }
     }
 
-    public void findUser(String username){
+    public UserData findUser(String username){
         UserData currentUser = dataAccess.getUser(username);
         if (currentUser == null) {
             throw new UnauthorizedResponse("unauthorized");
         }
+        return currentUser;
     }
 
-    public void authenticate(String authToken) throws Exception {
+    public AuthData authenticate(String authToken) throws UnauthorizedResponse {
         AuthData auth = dataAccess.getAuth(authToken);
         if (auth == null) {
             throw new UnauthorizedResponse("unauthorized");
         }
+        return auth;
     }
 
     public static String generateToken() {

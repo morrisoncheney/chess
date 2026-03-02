@@ -3,6 +3,7 @@ package dataaccess;
 import chess.ChessGame;
 import model.AuthData;
 import model.GameData;
+import model.GameDataListItem;
 import model.UserData;
 
 import java.util.ArrayList;
@@ -11,19 +12,16 @@ import java.util.HashMap;
 public class MemoryDataAccess {
     final private HashMap<String, UserData> users = new HashMap<>();
     final private HashMap<String, AuthData> auths = new HashMap<>();
-    final private HashMap<String, GameData> games = new HashMap<>();
+    final private HashMap<Integer, GameData> games = new HashMap<>();
 
-    private int nextId = 1234;
+    private Integer nextId = 1233;
 
     public UserData addUser(UserData user) {
-        user = new UserData(user.username(), user.password(), user.email());
 
         users.put(user.username(), user);
+
         return user;
     }
-
-//    public PetList listPets() {return new PetList(users.values());}
-//    I don't think I need a UserList or anything like that.
 
     public UserData getUser(String username) {
         return users.get(username);
@@ -33,17 +31,13 @@ public class MemoryDataAccess {
         users.remove(username);
     }
 
-    public void deleteAllUserData() {
-        users.clear();
-    }
+    public void deleteAllUserData() { users.clear(); }
 
 /////////////////////////////////////////////////////////////////////
 
-    public AuthData addAuth(AuthData auth) {
-        auth = new AuthData(auth.authToken(), auth.username());
-
+    public void addAuth(AuthData auth) {
         auths.put(auth.authToken(), auth);
-        return auth;
+
     }
 
     public AuthData getAuth(String authToken) {
@@ -60,35 +54,46 @@ public class MemoryDataAccess {
 
     ///////////////////////////////////////////////////////////////
 
-    public int addGame(String gameName) {
+    public Integer addGame(String gameName) {
+        nextId++;
+        GameData game = new GameData(nextId, new ChessGame(), "null", "null", gameName);
 
+        games.put(nextId, game);
 
-
-        return 67;
+        return nextId;
     }
 
-    public GameData getGame(String gameId) {
+    public GameData getGame(Integer gameId) {
         return games.get(gameId);
     }
 
-    public ArrayList<String> getGameList(){
+    public ArrayList<GameDataListItem> getGameList(){
 
-        ArrayList<String> gameList = new ArrayList<>();
+        ArrayList<GameDataListItem> gameList = new ArrayList<>();
 
         for (GameData game : games.values()) {
-            gameList.add(game.toJsonString());
+            GameDataListItem item;
+            item = new GameDataListItem(game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName());
+            gameList.add(item);
         }
         return gameList;
 
     }
 
-    public void updateGame(String gameID, ChessGame game) {
+    public void replaceUser(ChessGame.TeamColor color, String username, Integer gameID) {
+        GameData data = games.get(gameID);
 
-        games.replace(gameID, games.get(gameID).updateGame(game));
-
+        GameData newGame;
+        if (color == ChessGame.TeamColor.WHITE){
+            newGame = new GameData(data.gameID(), data.game(), username, data.blackUsername(), data.gameName());
+            games.replace(gameID, newGame);
+        } else {
+            newGame = new GameData(data.gameID(), data.game(), data.whiteUsername(), username, data.gameName());
+            games.replace(gameID, newGame);
+        }
     }
 
-    public void deleteGame(String gameId) {
+    public void deleteGame(Integer gameId) {
         games.remove(gameId);
     }
 

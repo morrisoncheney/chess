@@ -1,6 +1,7 @@
 package unittests;
 
 import dataaccess.MemoryDataAccess;
+import model.AuthData;
 import model.UserData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,5 +38,11 @@ class MemoryDataAccessTests {
         data.addUser(new UserData("x", "y", "z"));
         data.deleteAllUserData();
         assertNull(data.getUser("x"));
+    }
+
+    @Test
+    void authenticate() {
+        UserData auth = data.addUser(new UserData("x", "y", "z"));
+
     }
 }

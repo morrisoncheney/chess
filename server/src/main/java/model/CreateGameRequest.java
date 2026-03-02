@@ -2,10 +2,11 @@ package model;
 
 import server.BadRequestException;
 
-public record LogoutRequest(String authToken) {
+public record CreateGameRequest(String gameName) {
+
     public void check(){
         try {
-            if (this.authToken().isEmpty()) {
+            if (this.gameName.isEmpty() ) {
                 throw new Exception("you can't see me");
             }
         } catch (Exception e) {
