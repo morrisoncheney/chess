@@ -93,10 +93,6 @@ public class MemoryDataAccess {
         }
     }
 
-    public void deleteGame(Integer gameId) {
-        games.remove(gameId);
-    }
-
     public void deleteAllGames() {
         games.clear();
     }

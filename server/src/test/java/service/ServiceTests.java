@@ -89,7 +89,7 @@ class ServiceTests {
     }
 
     @Test
-    void memorySelfDestruct_clearsAllData() {
+    void memorySelfDestructClearsAllData() {
         UserData u = new UserData("x4", "y4", "z4");
         AuthData auth = service.registerRequest(u);
         assertNotNull(data.getUser("x4"));
