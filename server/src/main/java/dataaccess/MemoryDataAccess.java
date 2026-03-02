@@ -27,10 +27,6 @@ public class MemoryDataAccess {
         return users.get(username);
     }
 
-    public void deleteUser(String username) {
-        users.remove(username);
-    }
-
     public void deleteAllUserData() { users.clear(); }
 
 /////////////////////////////////////////////////////////////////////
