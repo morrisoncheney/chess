@@ -1,8 +1,6 @@
 package service;
 
 import chess.ChessGame;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import dataaccess.MemoryDataAccess;
 import io.javalin.http.ForbiddenResponse;
 import io.javalin.http.UnauthorizedResponse;
@@ -86,7 +84,7 @@ public class Service {
 
         if (request.playerColor() == ChessGame.TeamColor.WHITE && game.whiteUsername() == null) {
             dataAccess.replaceUser(request.playerColor(), username, gameID);
-        } else if (game.blackUsername() == null) {
+        } else if (request.playerColor() == ChessGame.TeamColor.BLACK && game.blackUsername() == null) {
             dataAccess.replaceUser(request.playerColor(), username, gameID);
         } else {
             throw new ForbiddenResponse("already taken");
