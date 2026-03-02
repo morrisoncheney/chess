@@ -21,7 +21,7 @@ public class Service {
     public AuthData registerRequest(UserData user){
         user.check();
 
-        checkForUser(user); // Throws an error if exists.
+        checkUserDNE(user); // Throws an error if exists.
 
         dataAccess.addUser(user);
 
@@ -37,10 +37,7 @@ public class Service {
     public AuthData loginRequest(LoginRequest log) {
         log.check();
 
-        UserData currentUser = dataAccess.getUser(log.username());
-        if (currentUser == null) {
-            throw new UnauthorizedResponse("unauthorized");
-        }
+        findUser(log.username());
 
         String authToken = generateToken();
 
@@ -63,10 +60,17 @@ public class Service {
 
     }
 
-    public void checkForUser(UserData user){
+    public void checkUserDNE(UserData user){
         UserData currentUser = dataAccess.getUser(user.username());
         if (currentUser != null) {
             throw new ForbiddenResponse("already taken");
+        }
+    }
+
+    public void findUser(String username){
+        UserData currentUser = dataAccess.getUser(username);
+        if (currentUser == null) {
+            throw new UnauthorizedResponse("unauthorized");
         }
     }
 

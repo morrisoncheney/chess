@@ -60,7 +60,9 @@ public class MemoryDataAccess {
 
     ///////////////////////////////////////////////////////////////
 
-    public int addGame() {
+    public int addGame(String gameName) {
+
+
 
         return 67;
     }
@@ -82,7 +84,7 @@ public class MemoryDataAccess {
 
     public void updateGame(String gameID, ChessGame game) {
 
-        games.repalce(gameID, games.get(gameID).update(game));
+        games.replace(gameID, games.get(gameID).updateGame(game));
 
     }
 
