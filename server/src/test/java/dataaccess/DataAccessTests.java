@@ -1,6 +1,7 @@
 package dataaccess;
 
 import model.AuthData;
+import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -34,6 +35,15 @@ public class DataAccessTests {
     }
 
     @Test
+    void addDuplicateUser() {
+        UserData user = new UserData("me", "memememe", "me@me.me");
+
+        db.addUser(user);
+
+        Assertions.assertThrows(Exception.class, () -> db.addUser(user));
+    }
+
+    @Test
     void getInternationalManOfMystery(){
 
         UserData rec = db.getUser(unfindable.username());
@@ -59,6 +69,11 @@ public class DataAccessTests {
     }
 
     @Test
+    void deleteAllNonexistentUsers() {
+        Assertions.assertDoesNotThrow(() -> db.deleteAllUserData());
+    }
+
+    @Test
     void addAndGetAuthTest(){
         UserData user = new UserData("me1", "memememe1", "me@me.me1");
 
@@ -71,6 +86,20 @@ public class DataAccessTests {
         AuthData rec = db.getAuth(auth.authToken());
 
         Assertions.assertEquals(auth, rec);
+    }
+
+    @Test
+    void addAuthDupeError() {
+        UserData user = new UserData("me1", "memememe1", "me@me.me1");
+
+        db.addUser(user);
+
+        AuthData auth = new AuthData("me1", "67");
+
+        db.addAuth(auth);
+
+
+        Assertions.assertThrows(Exception.class, () -> db.addAuth(auth));
     }
 
     @Test
@@ -128,8 +157,67 @@ public class DataAccessTests {
     }
 
     @Test
-    void addGame(){
+    void addAndGetGame(){
+        int id = db.addGame("gameBoi");
 
+        GameData game = db.getGame(id);
+
+        Assertions.assertEquals("gameBoi", game.gameName());
     }
 
+    @Test
+    void getNonexistentGame() {
+        GameData game = db.getGame(0);
+        Assertions.assertNull(game);
+    }
+
+    @Test
+    void testGameList() {
+        db.addGame("game1");
+        db.addGame("game2");
+
+        var gList = db.getGameList();
+        Assertions.assertTrue(gList.size() >= 2);
+    }
+
+    @Test
+    void testGameListEmpty() {
+        var gList = db.getGameList();
+        Assertions.assertTrue(gList.isEmpty());
+    }
+
+    @Test
+    void replaceUserTest() {
+        int id = db.addGame("game");
+        db.replaceUser(chess.ChessGame.TeamColor.WHITE, "user", id);
+
+        GameData game = db.getGame(id);
+        Assertions.assertEquals("user", game.whiteUsername());
+    }
+
+    @Test
+    void replaceNotUserTest() {
+        int id = db.addGame("game");
+
+        GameData game = db.getGame(id);
+        Assertions.assertNull(game.whiteUsername());
+    }
+
+    @Test
+    void replaceUserForNonexistentGame() {
+        int id = db.addGame("game");
+        Assertions.assertThrows(Exception.class,
+                () -> db.replaceUser(chess.ChessGame.TeamColor.WHITE, "user", 67));
+
+        GameData game = db.getGame(id);
+        Assertions.assertNull(game.whiteUsername());
+    }
+
+    @Test
+    void deleteGamesTest() {
+        db.addGame("el ulti-mo game");
+        db.deleteAllGames();
+
+        Assertions.assertEquals(0, db.getGameList().size());
+    }
 }
