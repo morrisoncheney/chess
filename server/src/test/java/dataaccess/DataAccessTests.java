@@ -39,6 +39,15 @@ public class DataAccessTests {
     }
 
     @Test
+    void getInternationalManOfMystery(){
+        UserData unfindable = new UserData("Austin Powers", "shallweshagnoworshaglater", "groovy_baby_1967@sis.gov");
+
+        UserData rec = db.getUser(unfindable.username());
+
+        Assertions.assertNull(rec);
+    }
+
+    @Test
     void deleteUsersTest() {
         UserData user = new UserData("me1", "memememe1", "me@me.me1");
 
