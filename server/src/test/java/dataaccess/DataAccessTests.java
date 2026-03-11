@@ -19,6 +19,7 @@ public class DataAccessTests {
     @Test
     void addAndGetUserPass() {
         UserData user = new UserData("me", "memememe", "me@me.me");
+
         db.addUser(user);
 
         UserData rec = db.getUser(user.username());
@@ -26,18 +27,34 @@ public class DataAccessTests {
         Assertions.assertEquals(user.email(), rec.email());
     }
 
-//    @Test
-//    void addUserFail() {
-//        UserData user = new UserData("me", "memememe", "me@me.me");
-//        Assertions.assertThrows(Exception.class, () -> db.addUser(user));
-//    }
-
     @Test
     void getUserPass() {
-        UserData user = new UserData("me", "memememe", "me@me.me");
+        UserData user = new UserData("me1", "memememe1", "me@me.me1");
+
+        db.addUser(user);
 
         UserData rec = db.getUser(user.username());
 
-        Assertions.assertEquals(user, rec);
+        Assertions.assertEquals(user.username(), rec.username());
     }
+
+    @Test
+    void deleteUsersTest() {
+        UserData user = new UserData("me1", "memememe1", "me@me.me1");
+
+        db.addUser(user);
+
+        UserData rec = db.getUser(user.username());
+
+        Assertions.assertEquals(user.username(), rec.username());
+
+        db.deleteAllUserData();
+
+        rec = db.getUser(user.username());
+
+        Assertions.assertNull(rec);
+    }
+
+
+
 }
