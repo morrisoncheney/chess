@@ -214,7 +214,7 @@ private final String[] createStatements = {
                     Object param = params[i];
                     if (param instanceof String p) ps.setString(i + 1, p);
                     else if (param instanceof Integer p) ps.setInt(i + 1, p);
-//                    else if (param instanceof PetType p) ps.setString(i + 1, p.toString());
+                    else if (param instanceof GameData g) ps.setString(i + 1, g.toString());
                     else if (param == null) ps.setNull(i + 1, NULL);
                 }
                 ps.executeUpdate();
@@ -230,6 +230,7 @@ private final String[] createStatements = {
             throw new DataAccessException(String.format("unable to update database | Statement: %s | ", statement), e);
         }
     }
+
 
 }
 
