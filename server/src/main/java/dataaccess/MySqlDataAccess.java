@@ -163,6 +163,27 @@ public class MySqlDataAccess { // this should use the same method names as Memor
 
         ArrayList<GameDataListItem> gameList = new ArrayList<>();
 
+        GameDataListItem gdli;
+
+        try (Connection conn = DatabaseManager.getConnection()) {
+            String statement = "SELECT * FROM games";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                try (ResultSet rs = ps.executeQuery()){
+                    while (rs.next()) {
+                        GameData game = new Gson().fromJson(rs.getString("gameDataJson"), GameData.class);
+                        gdli = new GameDataListItem(rs.getInt("gameID"), game.whiteUsername(),
+                                game.blackUsername(), game.gameName());
+                        gameList.add(gdli);
+                    }
+
+                }
+            }
+
+
+        } catch (Exception e) {
+            throw new DataAccessException("Unable to read data: ", e);
+        }
+
         for (GameData game : games.values()) {
             GameDataListItem item;
             item = new GameDataListItem(game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName());
@@ -178,11 +199,19 @@ public class MySqlDataAccess { // this should use the same method names as Memor
         GameData newGame;
         if (color == ChessGame.TeamColor.WHITE){
             newGame = new GameData(data.gameID(), data.game(), username, data.blackUsername(), data.gameName());
-            games.replace(gameID, newGame);
+            replace(gameID, newGame);
         } else {
             newGame = new GameData(data.gameID(), data.game(), data.whiteUsername(), username, data.gameName());
-            games.replace(gameID, newGame);
+            replace(gameID, newGame);
         }
+    }
+
+    private void replace(int gameID, GameData game) {
+
+        String statement = "UPDATE games SET gameDataJson=? WHERE gameID=?";
+
+        runUpdate(statement, game.toString(), gameID);
+
     }
 
     public void deleteAllGames() {
