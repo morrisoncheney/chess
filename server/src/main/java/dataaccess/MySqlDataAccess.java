@@ -1,16 +1,14 @@
 package dataaccess;
 
 import chess.ChessGame;
+import com.google.gson.Gson;
 import model.AuthData;
 import model.GameData;
 import model.GameDataListItem;
 import model.UserData;
 import org.mindrot.jbcrypt.BCrypt;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -24,8 +22,6 @@ public class MySqlDataAccess { // this should use the same method names as Memor
     }
 
     final private HashMap<Integer, GameData> games = new HashMap<>();
-
-    private Integer nextId = 1233;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
@@ -61,7 +57,7 @@ public class MySqlDataAccess { // this should use the same method names as Memor
     }
 
     public void deleteAllUserData() {
-        var statement = "DROP TABLE users";
+        var statement = "TRUNCATE users";
         runUpdate(statement);
     }
 
@@ -105,7 +101,7 @@ public class MySqlDataAccess { // this should use the same method names as Memor
     }
 
     public void deleteAllAuthData() {
-        var statement = "DROP TABLE auths";
+        var statement = "TRUNCATE auths";
         runUpdate(statement);
     }
 
@@ -113,15 +109,54 @@ public class MySqlDataAccess { // this should use the same method names as Memor
 
     public Integer addGame(String gameName) {
 
-        GameData game = new GameData(nextId, new ChessGame(), null, null, gameName);
+        try (Connection conn = DatabaseManager.getConnection()) {
 
-        games.put(nextId, game);
+            var statement = "INSERT INTO games (gameDataJson) VALUES (NULL)";
+            try (PreparedStatement ps1 = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
 
-        return nextId;
+                ps1.executeUpdate();
+
+                int id;
+
+                try (ResultSet rs = ps1.getGeneratedKeys()) {
+                    if (rs.next()){
+                        id = rs.getInt(1);
+                    } else {
+                        throw new Error("db failed to generate gameID");
+                    }
+                }
+
+                GameData game = new GameData(id, new ChessGame(), null, null, gameName);
+
+                statement = "UPDATE games SET gameDataJson=? WHERE gameID=?";
+
+                runUpdate(statement, game.toString(), id);
+
+                return id;
+            }
+        } catch (Exception e) {
+            throw new DataAccessException("Unable to read data: ", e);
+        }
     }
 
     public GameData getGame(Integer gameId) {
-        return new GameData(1, new ChessGame(), "w ", "b ", "gn ");
+        try (Connection conn = DatabaseManager.getConnection()) {
+
+            var statement = "SELECT gameDataJson FROM games WHERE gameID=?";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+
+                ps.setInt(1, gameId);
+                try (ResultSet rs = ps.executeQuery()) {
+
+                    if (rs.next()) {
+                        return new Gson().fromJson(rs.getString("gameDataJson"),GameData.class);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new DataAccessException("Unable to read data: ", e);
+        }
+        return null;
     }
 
     public ArrayList<GameDataListItem> getGameList(){
@@ -151,7 +186,7 @@ public class MySqlDataAccess { // this should use the same method names as Memor
     }
 
     public void deleteAllGames() {
-        var statement = "DROP TABLE games";
+        var statement = "TRUNCATE games";
         runUpdate(statement);
     }
 
@@ -173,9 +208,8 @@ private final String[] createStatements = {
         """,
         """
         CREATE TABLE IF NOT EXISTS games (
-            `gameID` int NOT NULL AUTO_INCREMENT,
-            `gameDataJson` JSON DEFAULT NULL,
-            PRIMARY KEY (`gameID`)
+            `gameID` int NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            `gameDataJson` JSON DEFAULT NULL
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
         """
 };
