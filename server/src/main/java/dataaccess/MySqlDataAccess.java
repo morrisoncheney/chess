@@ -219,7 +219,7 @@ public class MySqlDataAccess { // this should use the same method names as Memor
         runUpdate(statement);
     }
 
-private final String[] createStatements = {
+    private final String[] createStatements = {
         """ 
         CREATE TABLE IF NOT EXISTS users (
           `user` varchar(256) NOT NULL,
@@ -241,7 +241,7 @@ private final String[] createStatements = {
             `gameDataJson` JSON DEFAULT NULL
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
         """
-};
+    };
 
 
     private void configureDatabase() throws DataAccessException {
