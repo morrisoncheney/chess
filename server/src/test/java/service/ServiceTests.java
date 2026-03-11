@@ -2,6 +2,7 @@ package service;
 
 import chess.ChessGame;
 import dataaccess.MemoryDataAccess;
+import dataaccess.MySqlDataAccess;
 import model.AuthData;
 import model.GameData;
 import model.JoinGameRequest;
@@ -18,11 +19,11 @@ import static org.junit.jupiter.api.Assertions.*;
 class ServiceTests {
 
     private Service service;
-    private MemoryDataAccess data;
+    private MySqlDataAccess data;
 
     @BeforeEach
     void setup() {
-        data = new MemoryDataAccess();
+        data = new MySqlDataAccess();
         service = new Service(data);
     }
 

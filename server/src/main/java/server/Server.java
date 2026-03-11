@@ -2,6 +2,7 @@ package server;
 
 import com.google.gson.Gson;
 import dataaccess.MemoryDataAccess;
+import dataaccess.MySqlDataAccess;
 import io.javalin.*;
 import io.javalin.http.Context;
 import io.javalin.http.ForbiddenResponse;
@@ -17,7 +18,7 @@ public class Server {
 
     private final Javalin javalin;
 
-    private final Handler handler = new Handler(new Service(new MemoryDataAccess()));
+    private final Handler handler = new Handler(new Service(new MySqlDataAccess()));
 
     // add other handler types in here as needed
 

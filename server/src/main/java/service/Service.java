@@ -2,6 +2,7 @@ package service;
 
 import chess.ChessGame;
 import dataaccess.MemoryDataAccess;
+import dataaccess.MySqlDataAccess;
 import io.javalin.http.ForbiddenResponse;
 import io.javalin.http.UnauthorizedResponse;
 import model.*;
@@ -14,9 +15,9 @@ import java.util.UUID;
 
 public class Service {
 
-    private final MemoryDataAccess dataAccess;
+    private final MySqlDataAccess dataAccess;
 
-    public Service(MemoryDataAccess dataAccess){
+    public Service(MySqlDataAccess dataAccess){
         this.dataAccess = dataAccess;
     }
 
