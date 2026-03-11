@@ -107,7 +107,7 @@ public class MySqlDataAccess { // this should use the same method names as Memor
 
 /////////////////////////////////////////////////////////////////////
 
-    public Integer addGame(String gameName) {
+    public int addGame(String gameName) {
 
         try (Connection conn = DatabaseManager.getConnection()) {
 

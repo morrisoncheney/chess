@@ -4,18 +4,21 @@ import model.AuthData;
 import model.UserData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 
 public class DataAccessTests {
     // we shall begin testing
-    static MySqlDataAccess db;
-    static UserData unfindable;
+    MySqlDataAccess db;
+    UserData unfindable;
 
-    @BeforeAll
-    static void setup() {
+    @BeforeEach
+    void setup() {
         db = new MySqlDataAccess();
         db.deleteAllUserData();
+        db.deleteAllAuthData();
+        db.deleteAllGames();
         unfindable = new UserData("Austin Powers", "shallweshagnoworshaglater", "groovy_baby_1967@sis.gov");
     }
 
@@ -65,7 +68,7 @@ public class DataAccessTests {
 
         db.addAuth(auth);
 
-        AuthData rec = db.getAuth(auth.username());
+        AuthData rec = db.getAuth(auth.authToken());
 
         Assertions.assertEquals(auth, rec);
     }
@@ -88,8 +91,45 @@ public class DataAccessTests {
     }
 
     @Test
+    void getNonexistentAuth(){
+        AuthData auth = db.getAuth("1967_baby_yeah");
+
+        Assertions.assertNull(auth);
+    }
+
+    @Test
     void deleteNonexistentAuth(){
-        db.getAuth("1967_baby_yeah");
+        Assertions.assertDoesNotThrow(() -> db.deleteAuth("1967_baby_yeah"));
+    }
+
+    @Test
+    void deleteAllAuths(){
+        UserData user = new UserData("me1", "memememe1", "me@me.me1");
+
+        UserData user2 = new UserData("me12", "memememe12", "me@me.me12");
+
+        db.addUser(user);
+        db.addUser(user2);
+
+        AuthData auth = new AuthData("me1", "67");
+        AuthData auth2 = new AuthData("me12", "68");
+
+        db.addAuth(auth);
+        db.addAuth(auth2);
+
+        AuthData rec = db.getAuth(auth.authToken());
+
+        Assertions.assertEquals(auth, rec);
+
+        db.deleteAllAuthData();
+
+        Assertions.assertNull(db.getAuth("67"));
+        Assertions.assertNull(db.getAuth("68"));
+    }
+
+    @Test
+    void addGame(){
+
     }
 
 }
