@@ -6,6 +6,7 @@ import dataaccess.MySqlDataAccess;
 import io.javalin.http.ForbiddenResponse;
 import io.javalin.http.UnauthorizedResponse;
 import model.*;
+import org.mindrot.jbcrypt.BCrypt;
 import server.BadRequestException;
 
 import java.util.ArrayList;
@@ -42,7 +43,7 @@ public class Service {
 
         UserData user = findUser(log.username());
 
-        if (!Objects.equals(user.password(), log.password())){
+        if (!BCrypt.checkpw(log.password(), user.password())){
             throw new UnauthorizedResponse("unauthorized");
         }
 
@@ -128,6 +129,9 @@ public class Service {
         return null;
     }
 
+    private String hashP(String clearPassword) {
+        return BCrypt.hashpw(clearPassword, BCrypt.gensalt());
+    }
 
 
 }

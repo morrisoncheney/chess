@@ -1,7 +1,6 @@
 package dataaccess;
 
 import chess.ChessGame;
-import com.google.gson.Gson;
 import model.AuthData;
 import model.GameData;
 import model.GameDataListItem;
@@ -32,11 +31,11 @@ public class MySqlDataAccess { // this should use the same method names as Memor
 
     public UserData addUser(UserData user) {
 
-        var statement = "INSERT INTO users (username, password, email) VALUES (?, ?, ?)";
+        var statement = "INSERT INTO users VALUES (?, ?, ?)";
 
         String hashed = hashP(user.password());
 
-        executeUpdate(statement, user.username(), hashed, user.email());
+        runUpdate(statement, user.username(), hashed, user.email());
 
         return user;
     }
@@ -62,8 +61,8 @@ public class MySqlDataAccess { // this should use the same method names as Memor
     }
 
     public void deleteAllUserData() {
-        var statement = "TRUNCATE users";
-        executeUpdate(statement);
+        var statement = "DROP TABLE users";
+        runUpdate(statement);
     }
 
 
@@ -77,7 +76,7 @@ public class MySqlDataAccess { // this should use the same method names as Memor
     public void addAuth(AuthData auth) {
         var statement = "INSERT INTO auths (username, authToken) VALUES (?, ?)";
 
-        executeUpdate(statement, auth.username(), auth.authToken());
+        runUpdate(statement, auth.username(), auth.authToken());
     }
 
     public AuthData getAuth(String authToken) {
@@ -101,25 +100,13 @@ public class MySqlDataAccess { // this should use the same method names as Memor
     }
 
     public void deleteAuth(String authToken) {
-        try (Connection conn = DatabaseManager.getConnection()) {
-
-            var statement = "DELETE FROM auths WHERE authToken=?";
-            try (PreparedStatement ps = conn.prepareStatement(statement)) {
-
-                ps.setString(1, authToken);
-                try (ResultSet rs = ps.executeQuery()) {
-                    System.out.println("Yeah this probably means that the DELETE was a success.");
-                    System.out.println(rs);
-                }
-            }
-        } catch (Exception e) {
-            throw new DataAccessException("Unable to read data: ", e);
-        }
+        var statement = "DELETE FROM auths WHERE authToken=?";
+        runUpdate(statement, authToken);
     }
 
     public void deleteAllAuthData() {
-        var statement = "TRUNCATE auths";
-        executeUpdate(statement);
+        var statement = "DROP TABLE auths";
+        runUpdate(statement);
     }
 
 /////////////////////////////////////////////////////////////////////
@@ -164,8 +151,8 @@ public class MySqlDataAccess { // this should use the same method names as Memor
     }
 
     public void deleteAllGames() {
-        var statement = "TRUNCATE games";
-        executeUpdate(statement);
+        var statement = "DROP TABLE games";
+        runUpdate(statement);
     }
 
 private final String[] createStatements = {
@@ -180,7 +167,7 @@ private final String[] createStatements = {
         """
         CREATE TABLE IF NOT EXISTS auths (
             `authToken` varchar(256) NOT NULL,
-            `user` varchar(256) NOT NULL,
+            `username` varchar(256) NOT NULL,
             PRIMARY KEY (`authToken`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
         """,
@@ -207,7 +194,7 @@ private final String[] createStatements = {
         }
     }
 
-    private int executeUpdate(String statement, Object... params) throws DataAccessException {
+    private int runUpdate(String statement, Object... params) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
             try (PreparedStatement ps = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
                 for (int i = 0; i < params.length; i++) {

@@ -5,6 +5,7 @@ import model.AuthData;
 import model.GameData;
 import model.GameDataListItem;
 import model.UserData;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,9 +17,11 @@ public class MemoryDataAccess {
 
     private Integer nextId = 1233;
 
+/////////////////////////////////////////////////////////////////////
+
     public UserData addUser(UserData user) {
 
-        users.put(user.username(), user);
+        users.put(user.username(), new UserData(user.username(), hashP(user.password()), user.email()));
 
         return user;
     }
@@ -28,6 +31,10 @@ public class MemoryDataAccess {
     }
 
     public void deleteAllUserData() { users.clear(); }
+
+    private String hashP(String clearPassword) {
+        return BCrypt.hashpw(clearPassword, BCrypt.gensalt());
+    }
 
 /////////////////////////////////////////////////////////////////////
 
