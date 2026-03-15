@@ -36,7 +36,7 @@ public class tictactoe {
 
 //    private static void drawHeaders(PrintStream out) {
 //
-//        setBlack(out);
+//        setDarkGray(out);
 //
 //
 //        for (int boardCol = 0; boardCol < BOARD_SIZE_IN_SQUARES; ++boardCol) {
@@ -65,7 +65,7 @@ public class tictactoe {
 //
 //        out.print(player);
 //
-//        setBlack(out);
+//        setDarkGray(out);
 //    }
 
     private static void drawTicTacToeBoard(PrintStream out) {
@@ -77,7 +77,7 @@ public class tictactoe {
 //            if (boardRow < BOARD_SIZE_IN_SQUARES - 1) {
 //                // Draw horizontal row separator.
 //                drawHorizontalLine(out);
-//                setBlack(out);
+//                setDarkGray(out);
 //            }
         }
     }
@@ -88,25 +88,27 @@ public class tictactoe {
             for (int boardCol = 0; boardCol < BOARD_SIZE_IN_SQUARES; ++boardCol) {
 
                 if ((boardRow + boardCol) % 2 == 0) {
-                    setBlack(out);
+                    setDarkGray(out);
+//                    out.print(SET_TEXT_COLOR_WHITE);
                 } else {
-                    setWhite(out);
+                    setLightGray(out);
+                    out.print(SET_TEXT_COLOR_BLACK);
                 }
 
-//                if (squareRow == SQUARE_SIZE_IN_PADDED_CHARS / 2) {
-//                    int prefixLength = SQUARE_SIZE_IN_PADDED_CHARS / 2;
-//                    int suffixLength = SQUARE_SIZE_IN_PADDED_CHARS - prefixLength - 1;
-//
-//                    out.print(EMPTY.repeat(prefixLength));
-//                    printPlayer(out, rand.nextBoolean() ? X : O);
-//                    out.print(EMPTY.repeat(suffixLength));
-//                }
-//                else {
-//                    out.print(EMPTY.repeat(SQUARE_SIZE_IN_PADDED_CHARS));
-//                }
-                for (int i = 0; i < SQUARE_SIZE_IN_PADDED_CHARS * 3; i++) {
-                    out.print(boardCol);
+                if (squareRow == SQUARE_SIZE_IN_PADDED_CHARS / 2) {
+                    int prefixLength = SQUARE_SIZE_IN_PADDED_CHARS / 2;
+                    int suffixLength = SQUARE_SIZE_IN_PADDED_CHARS - prefixLength - 1;
+
+                    out.print(EMPTY.repeat(prefixLength));
+                    printPlayer(out, rand.nextBoolean() ? X : O);
+                    out.print(EMPTY.repeat(suffixLength));
                 }
+                else {
+                    out.print(EMPTY.repeat(SQUARE_SIZE_IN_PADDED_CHARS));
+                }
+//                for (int i = 0; i < SQUARE_SIZE_IN_PADDED_CHARS * 3; i++) {
+//                    out.print(boardCol);
+//                }
 
 //                if (boardCol < BOARD_SIZE_IN_SQUARES - 1) {
 //                    // Draw vertical column separator.
@@ -114,7 +116,7 @@ public class tictactoe {
 //                    out.print(EMPTY.repeat(LINE_WIDTH_IN_PADDED_CHARS));
 //                }
 
-//                setBlack(out);
+//                setDarkGray(out);
                 out.print(RESET_BG_COLOR);
             }
 
@@ -131,13 +133,13 @@ public class tictactoe {
 //            setRed(out);
 //            out.print(EMPTY.repeat(boardSizeInSpaces));
 //
-//            setBlack(out);
+//            setDarkGray(out);
 //            out.println();
 //        }
 //    }
 
-    private static void setWhite(PrintStream out) {
-        out.print(SET_BG_COLOR_WHITE);
+    private static void setLightGray(PrintStream out) {
+        out.print(SET_BG_COLOR_LIGHT_GREY);
         out.print(SET_TEXT_COLOR_WHITE);
     }
 
@@ -146,17 +148,17 @@ public class tictactoe {
         out.print(SET_TEXT_COLOR_RED);
     }
 
-    private static void setBlack(PrintStream out) {
-        out.print(SET_BG_COLOR_BLACK);
+    private static void setDarkGray(PrintStream out) {
+        out.print(SET_BG_COLOR_DARK_GREY);
         out.print(SET_TEXT_COLOR_BLACK);
     }
 
-//    private static void printPlayer(PrintStream out, String player) {
+    private static void printPlayer(PrintStream out, String player) {
 //        out.print(SET_BG_COLOR_WHITE);
 //        out.print(SET_TEXT_COLOR_BLACK);
-//
-//        out.print(player);
-//
-//        setWhite(out);
-//    }
+
+        out.print(player);
+
+//        setLightGray(out);
+    }
 }
