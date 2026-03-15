@@ -87,8 +87,7 @@ public class tictactoe {
         for (int squareRow = 0; squareRow < SQUARE_SIZE_IN_PADDED_CHARS; ++squareRow) {
             for (int boardCol = 0; boardCol < BOARD_SIZE_IN_SQUARES; ++boardCol) {
 
-
-                if (boardRow + boardCol % 2 == 0) {
+                if ((boardRow + boardCol) % 2 == 0) {
                     setBlack(out);
                 } else {
                     setWhite(out);
@@ -103,8 +102,11 @@ public class tictactoe {
 //                    out.print(EMPTY.repeat(suffixLength));
 //                }
 //                else {
-                    out.print(EMPTY.repeat(SQUARE_SIZE_IN_PADDED_CHARS));
+//                    out.print(EMPTY.repeat(SQUARE_SIZE_IN_PADDED_CHARS));
 //                }
+                for (int i = 0; i < SQUARE_SIZE_IN_PADDED_CHARS * 3; i++) {
+                    out.print(boardCol);
+                }
 
 //                if (boardCol < BOARD_SIZE_IN_SQUARES - 1) {
 //                    // Draw vertical column separator.
