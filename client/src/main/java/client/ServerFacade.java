@@ -30,10 +30,10 @@ public class ServerFacade {
         return handleResponse(response, AuthData.class);
     }
 
-    public Integer create(String gameName, String authToken) throws ResponseException{
+    public CreateGameResult create(String gameName, String authToken) throws ResponseException{
         var request = buildRequest("POST", "/game", new CreateGameRequest(gameName), authToken);
         var response = sendRequest(request);
-        return handleResponse(response, Integer.class);
+        return handleResponse(response, CreateGameResult.class);
     }
 
     public void logout(String auth) throws ResponseException{ // the auth is in the header somehow

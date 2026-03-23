@@ -72,6 +72,7 @@ public class Client {
     }
 
     public String signIn(String... params) throws ResponseException {
+        assertSignedOut();
         if (params.length == 2) {
             AuthData auth = server.login(params[0], params[1]);
             userAuth = auth.authToken();
@@ -84,6 +85,7 @@ public class Client {
     }
 
     public String register(String... params) throws ResponseException {
+        assertSignedOut();
         if (params.length == 3) {
             String username = params[0];
             String password = params[1];
@@ -117,8 +119,8 @@ public class Client {
         assertSignedIn();
         if (params.length == 1) {
             String gameName = params[0];
-            Integer gameID = server.create(gameName, userAuth);
-            return String.format("Successfully created chess game [%s] at gameID [%d].", gameName, gameID);
+            CreateGameResult gameData = server.create(gameName, userAuth);
+            return String.format("Successfully created chess game [%s] at gameID [%d].", gameName, gameData.gameID());
         }
         throw new ResponseException(ResponseException.Code.ClientError, "Expected: <game name>");
     }
@@ -143,7 +145,7 @@ public class Client {
         String temp = activeUsername;
         activeUsername = null;
 
-        return String.format("[%s] logged out.", temp);
+        return String.format("Bye %s.", temp);
     }
 
 //    private Pet getPet(int id) throws ResponseException {
@@ -175,6 +177,12 @@ public class Client {
     private void assertSignedIn() throws ResponseException {
         if (state == State.SIGNEDOUT) {
             throw new ResponseException(ResponseException.Code.ClientError, "You must sign in");
+        }
+    }
+
+    private void assertSignedOut() throws ResponseException {
+        if (state == State.SIGNEDIN) {
+            throw new ResponseException(ResponseException.Code.ClientError, "You must sign out");
         }
     }
 }
