@@ -15,6 +15,7 @@ public class Client {
     private State state = State.SIGNEDOUT;
 
     private String userAuth;
+    private Integer currGameID;
 
     public Client(String serverUrl) throws ResponseException {
         server = new ServerFacade(serverUrl);
@@ -44,7 +45,8 @@ public class Client {
     }
 
     private void printPrompt() {
-        System.out.print( ERASE_SCREEN + "\n" + SET_BG_COLOR_BLACK + "[" + state + "]>>> " + SET_TEXT_COLOR_BLUE);
+        System.out.print( ERASE_SCREEN + "\n" + SET_BG_COLOR_BLACK
+                + SET_TEXT_COLOR_WHITE + "[" + state + "]>>> " + SET_TEXT_COLOR_BLUE);
     }
 
 
@@ -56,7 +58,7 @@ public class Client {
             return switch (cmd) {
                 case "login" -> signIn(params);
                 case "register" -> register(params);
-//                case "create" -> adoptPet(params);
+                case "create" -> create(params);
                 case "list" -> listGames();
 //                case "join" -> adoptAllPets();
 //                case "logout" -> signOut();
@@ -74,7 +76,7 @@ public class Client {
             userAuth = auth.authToken();
             // can we check response codes here somehow?
             state = State.SIGNEDIN;
-            return String.format("You signed in as %s.", params[0]);
+            return String.format("Welcome back %s.\n", params[0]) + help();
         }
         throw new ResponseException(ResponseException.Code.ClientError, "Expected: <username> <password>");
     }
@@ -90,7 +92,7 @@ public class Client {
             // can we check response codes here somehow?
             userAuth = auth.authToken();
             state = State.SIGNEDIN;
-            return String.format("Registration successful.\nYou signed in as %s.", username);
+            return String.format("Registration successful.\nWelcome to 240 Chess %s.\n", username) + help();
         }
         throw new ResponseException(ResponseException.Code.ClientError, "Expected: <username> <password> <email>");
     }
@@ -107,21 +109,15 @@ public class Client {
         return result.toString();
     }
 
-//    public String adoptPet(String... params) throws ResponseException {
-//        assertSignedIn();
-//        if (params.length == 1) {
-//            try {
-//                int id = Integer.parseInt(params[0]);
-//                Pet pet = getPet(id);
-//                if (pet != null) {
-//                    server.logout();
-//                    return String.format("%s says %s", pet.name(), pet.sound());
-//                }
-//            } catch (NumberFormatException ignored) {
-//            }
-//        }
-//        throw new ResponseException(ResponseException.Code.ClientError, "Expected: <pet id>");
-//    }
+    public String create(String... params) throws ResponseException {
+        assertSignedIn();
+        if (params.length == 1) {
+            String gameName = params[0];
+            Integer gameID = server.create(gameName, userAuth);
+            return String.format("Successfully created chess game: %s at gameID: %d.", gameName, gameID);
+        }
+        throw new ResponseException(ResponseException.Code.ClientError, "Expected: <game name>");
+    }
 
 //    public String adoptAllPets() throws ResponseException {
 //        assertSignedIn();

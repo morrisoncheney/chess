@@ -7,7 +7,7 @@ import java.nio.charset.StandardCharsets;
 
 public class ClientMain {
     private static Client client;
-    static void main(String[] args) throws ResponseException {// http://localhost:8080/
+    static void main(String[] args) throws ResponseException {
         PrintStream out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
 
         out.println( "240 Chess ClientMain Initializing...\n");
