@@ -118,7 +118,7 @@ public class Client {
         if (params.length == 1) {
             String gameName = params[0];
             Integer gameID = server.create(gameName, userAuth);
-            return String.format("Successfully created chess game: %s at gameID: %d.", gameName, gameID);
+            return String.format("Successfully created chess game [%s] at gameID [%d].", gameName, gameID);
         }
         throw new ResponseException(ResponseException.Code.ClientError, "Expected: <game name>");
     }
@@ -136,11 +136,14 @@ public class Client {
 
     public String signOut() throws ResponseException {
         assertSignedIn();
+        server.logout(userAuth);
+
         state = State.SIGNEDOUT;
         userAuth = null;
         String temp = activeUsername;
         activeUsername = null;
-        return String.format("%s ogged out.", temp);
+
+        return String.format("[%s] logged out.", temp);
     }
 
 //    private Pet getPet(int id) throws ResponseException {
