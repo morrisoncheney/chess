@@ -16,6 +16,7 @@ public class Client {
 
     private String userAuth;
     private Integer currGameID;
+    private String activeUsername;
 
     public Client(String serverUrl) throws ResponseException {
         server = new ServerFacade(serverUrl);
@@ -61,7 +62,7 @@ public class Client {
                 case "create" -> create(params);
                 case "list" -> listGames();
 //                case "join" -> adoptAllPets();
-//                case "logout" -> signOut();
+                case "logout" -> signOut();
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -74,6 +75,7 @@ public class Client {
         if (params.length == 2) {
             AuthData auth = server.login(params[0], params[1]);
             userAuth = auth.authToken();
+            activeUsername = auth.username();
             // can we check response codes here somehow?
             state = State.SIGNEDIN;
             return String.format("Welcome back %s.\n", params[0]) + help();
@@ -91,6 +93,8 @@ public class Client {
             AuthData auth = server.registerUser(user);
             // can we check response codes here somehow?
             userAuth = auth.authToken();
+            activeUsername = auth.username();
+
             state = State.SIGNEDIN;
             return String.format("Registration successful.\nWelcome to 240 Chess %s.\n", username) + help();
         }
@@ -129,12 +133,15 @@ public class Client {
 //        server.clear();
 //        return buffer.toString();
 //    }
-//
-//    public String signOut() throws ResponseException {
-//        assertSignedIn();
-//        state = State.SIGNEDOUT;
-//        return String.format("%s left the shop", visitorName);
-//    }
+
+    public String signOut() throws ResponseException {
+        assertSignedIn();
+        state = State.SIGNEDOUT;
+        userAuth = null;
+        String temp = activeUsername;
+        activeUsername = null;
+        return String.format("%s ogged out.", temp);
+    }
 
 //    private Pet getPet(int id) throws ResponseException {
 //        for (Pet pet : server.listGames()) {
