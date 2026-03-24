@@ -1,5 +1,6 @@
 package client;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import exception.ResponseException;
 import model.*;
@@ -34,6 +35,11 @@ public class ServerFacade {
         var request = buildRequest("POST", "/game", new CreateGameRequest(gameName), authToken);
         var response = sendRequest(request);
         return handleResponse(response, CreateGameResult.class);
+    }
+
+    public void join(Integer gameID, ChessGame.TeamColor color, String authToken) throws ResponseException{
+        var request = buildRequest("POST", "/game", new JoinGameRequest(color, gameID), authToken);
+        var response = sendRequest(request);
     }
 
     public void logout(String auth) throws ResponseException{ // the auth is in the header somehow

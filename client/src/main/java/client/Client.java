@@ -61,7 +61,7 @@ public class Client {
                 case "register" -> register(params);
                 case "create" -> create(params);
                 case "list" -> listGames();
-                case "join" -> join();
+                case "play" -> join();
                 case "logout" -> signOut();
                 case "clear" -> clearDB();
                 case "quit" -> "quit";
@@ -127,11 +127,13 @@ public class Client {
         throw new ResponseException(ResponseException.Code.ClientError, "Expected: <game name>");
     }
 
-    public String join() throws ResponseException {
+    public String join(String... params) throws ResponseException {
         assertSignedIn();
+        if (params.length == 2) {
+            server.join(Integer.valueOf(params[0]), ChessGame.TeamColor.valueOf(params[1]), userAuth);
 
-
-
+            return "Successfully joined.";
+        }
     }
 
     public String signOut() throws ResponseException {
@@ -148,9 +150,13 @@ public class Client {
 
     public String clearDB() throws ResponseException {
         assertSignedIn();
-        state = State.SIGNEDOUT;
-        server.clear();
-        return "Bye bye everything.";
+        if (activeUsername == "mo") {
+            state = State.SIGNEDOUT;
+            server.clear();
+            return "Bye bye everything.";
+        } else {
+            return "Judo Chop failed.";
+        }
     }
 
 
@@ -159,15 +165,17 @@ public class Client {
             return """
                     - register <username> <password> <email>
                     - login <username> <password>
+                    - help
                     - quit
                     """;
         }
         return """
                 - create <gameName>
                 - list
-                - join <gameID>
-                - clear
+                - play <gameID> <WHITE|BLACK>
+                - observe <gameID>
                 - logout
+                - help
                 - quit
                 """;
     }
