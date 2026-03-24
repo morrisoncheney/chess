@@ -166,6 +166,7 @@ public class Client {
                 - create <gameName>
                 - list
                 - join <gameID>
+                - clear
                 - logout
                 - quit
                 """;
