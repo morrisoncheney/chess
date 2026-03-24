@@ -1,14 +1,10 @@
 package client;
 
 import chess.ChessGame;
-import com.google.gson.Gson;
 
 import java.util.Arrays;
 import java.util.Scanner;
 
-import java.util.ArrayList;
-
-import com.google.gson.internal.LinkedTreeMap;
 import exception.ResponseException;
 import model.*;
 import static ui.EscapeSequences.*;
@@ -67,6 +63,7 @@ public class Client {
                 case "list" -> listGames();
                 case "join" -> join();
                 case "logout" -> signOut();
+                case "clear" -> clearDB();
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -133,12 +130,8 @@ public class Client {
     public String join() throws ResponseException {
         assertSignedIn();
 
-        for (Pet pet : server.listGames()) {
-            buffer.append(String.format("%s says %s%n", pet.name(), pet.sound()));
-        }
 
-        server.clear();
-        return buffer.toString();
+
     }
 
     public String signOut() throws ResponseException {
@@ -153,14 +146,13 @@ public class Client {
         return String.format("Bye %s.", temp);
     }
 
-//    private Pet getPet(int id) throws ResponseException {
-//        for (Pet pet : server.listGames()) {
-//            if (pet.id() == id) {
-//                return pet;
-//            }
-//        }
-//        return null;
-//    }
+    public String clearDB() throws ResponseException {
+        assertSignedIn();
+        state = State.SIGNEDOUT;
+        server.clear();
+        return "Bye bye everything.";
+    }
+
 
     public String help() {
         if (state == State.SIGNEDOUT) {
