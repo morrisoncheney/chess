@@ -15,7 +15,7 @@ public record JoinGameRequest (ChessGame.TeamColor playerColor, Integer gameID){
                 throw new Exception("you can't see me");
             }
         } catch (Exception e) {
-            throw new BadRequestException("bad request (inside join game request)");
+            throw new BadRequestException("bad request");
         }
     }
 
