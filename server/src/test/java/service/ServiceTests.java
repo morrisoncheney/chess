@@ -1,7 +1,6 @@
 package service;
 
 import chess.ChessGame;
-import dataaccess.MemoryDataAccess;
 import dataaccess.MySqlDataAccess;
 import model.AuthData;
 import model.GameData;
@@ -10,7 +9,6 @@ import model.LoginRequest;
 import model.UserData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import server.BadRequestException;
 import io.javalin.http.ForbiddenResponse;
 import io.javalin.http.UnauthorizedResponse;
 

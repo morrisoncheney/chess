@@ -1,11 +1,9 @@
 package server.handlers;
 
-import chess.ChessGame;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import io.javalin.http.Context;
 import model.*;
-import server.BadRequestException;
 import service.Service;
 
 import java.util.ArrayList;

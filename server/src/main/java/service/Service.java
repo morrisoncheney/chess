@@ -1,16 +1,13 @@
 package service;
 
 import chess.ChessGame;
-import dataaccess.MemoryDataAccess;
 import dataaccess.MySqlDataAccess;
 import io.javalin.http.ForbiddenResponse;
 import io.javalin.http.UnauthorizedResponse;
 import model.*;
 import org.mindrot.jbcrypt.BCrypt;
-import server.BadRequestException;
 
 import java.util.ArrayList;
-import java.util.Objects;
 import java.util.UUID;
 
 

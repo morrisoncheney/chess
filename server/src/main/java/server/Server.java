@@ -7,9 +7,9 @@ import io.javalin.*;
 import io.javalin.http.Context;
 import io.javalin.http.ForbiddenResponse;
 import io.javalin.http.UnauthorizedResponse;
-import org.jetbrains.annotations.NotNull;
 import server.handlers.Handler;
 import service.Service;
+import model.BadRequestException;
 
 import java.util.Map;
 
