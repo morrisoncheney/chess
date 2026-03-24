@@ -7,6 +7,7 @@ import model.GameData;
 import model.JoinGameRequest;
 import model.LoginRequest;
 import model.UserData;
+import model.BadRequestException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import io.javalin.http.ForbiddenResponse;
