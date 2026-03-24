@@ -1,11 +1,14 @@
 package client;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 
 import java.util.Arrays;
 import java.util.Scanner;
 
 import java.util.ArrayList;
+
+import com.google.gson.internal.LinkedTreeMap;
 import exception.ResponseException;
 import model.*;
 import static ui.EscapeSequences.*;
@@ -16,6 +19,7 @@ public class Client {
 
     private String userAuth;
     private Integer currGameID;
+    private ChessGame.TeamColor userColor;
     private String activeUsername;
 
     public Client(String serverUrl) throws ResponseException {
@@ -61,7 +65,7 @@ public class Client {
                 case "register" -> register(params);
                 case "create" -> create(params);
                 case "list" -> listGames();
-//                case "join" -> adoptAllPets();
+                case "join" -> join();
                 case "logout" -> signOut();
                 case "quit" -> "quit";
                 default -> help();
@@ -72,7 +76,7 @@ public class Client {
     }
 
     public String signIn(String... params) throws ResponseException {
-        assertSignedOut();
+        assertSignedOut("login");
         if (params.length == 2) {
             AuthData auth = server.login(params[0], params[1]);
             userAuth = auth.authToken();
@@ -85,7 +89,7 @@ public class Client {
     }
 
     public String register(String... params) throws ResponseException {
-        assertSignedOut();
+        assertSignedOut("register");
         if (params.length == 3) {
             String username = params[0];
             String password = params[1];
@@ -105,12 +109,13 @@ public class Client {
 
     public String listGames() throws ResponseException {
         assertSignedIn();
-        ListGamesResult games = server.listGames();
+        ListGamesResult games = server.listGames(userAuth);
         var result = new StringBuilder();
-        var gson = new Gson();
 
-        for (Object game : gson.fromJson(String.valueOf(games.games()), ArrayList.class)) {
-            result.append(gson.toJson(game)).append('\n');
+        for (GameDataListItem game : games.games()) {
+
+            result.append(String.format("ID:%d Name:%s\n" +
+                    "   White:%s Black:%s", game.gameID(), game.gameName(),game.whiteUsername(),game.blackUsername())).append("\n\n");
         }
         return result.toString();
     }
@@ -125,16 +130,16 @@ public class Client {
         throw new ResponseException(ResponseException.Code.ClientError, "Expected: <game name>");
     }
 
-//    public String adoptAllPets() throws ResponseException {
-//        assertSignedIn();
-//        var buffer = new StringBuilder();
-//        for (Pet pet : server.listGames()) {
-//            buffer.append(String.format("%s says %s%n", pet.name(), pet.sound()));
-//        }
-//
-//        server.clear();
-//        return buffer.toString();
-//    }
+    public String join() throws ResponseException {
+        assertSignedIn();
+
+        for (Pet pet : server.listGames()) {
+            buffer.append(String.format("%s says %s%n", pet.name(), pet.sound()));
+        }
+
+        server.clear();
+        return buffer.toString();
+    }
 
     public String signOut() throws ResponseException {
         assertSignedIn();
@@ -180,9 +185,9 @@ public class Client {
         }
     }
 
-    private void assertSignedOut() throws ResponseException {
+    private void assertSignedOut(String tryingTo) throws ResponseException {
         if (state == State.SIGNEDIN) {
-            throw new ResponseException(ResponseException.Code.ClientError, "You must sign out");
+            throw new ResponseException(ResponseException.Code.ClientError, String.format("You must sign out to %s.", tryingTo));
         }
     }
 }

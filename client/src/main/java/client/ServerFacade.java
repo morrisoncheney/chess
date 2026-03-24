@@ -47,8 +47,8 @@ public class ServerFacade {
         sendRequest(request);
     }
 
-    public ListGamesResult listGames() throws ResponseException {
-        var request = buildRequest("GET", "/game", null);
+    public ListGamesResult listGames(String auth) throws ResponseException {
+        var request = buildRequest("GET", "/game", null, auth);
         var response = sendRequest(request);
         return handleResponse(response, ListGamesResult.class);
     }
