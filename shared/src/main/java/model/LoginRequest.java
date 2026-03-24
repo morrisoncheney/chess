@@ -1,7 +1,5 @@
 package model;
 
-import server.BadRequestException;
-
 public record LoginRequest(String username, String password) {
     public void check(){
         try {

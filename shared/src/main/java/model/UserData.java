@@ -1,10 +1,6 @@
 package model;
 
-import com.google.gson.*;
-import server.BadRequestException;
-
-import java.util.Objects;
-//import org.jetbrains.annotations.NotNull;
+import com.google.gson.Gson;
 
 public record UserData(String username, String password, String email) {
 
@@ -18,7 +14,6 @@ public record UserData(String username, String password, String email) {
         }
     }
 
-//    @NotNull
     public String toString() {
         return new Gson().toJson(this);
     }

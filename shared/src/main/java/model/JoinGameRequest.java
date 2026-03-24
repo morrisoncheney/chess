@@ -3,7 +3,6 @@ package model;
 import chess.ChessGame;
 import com.google.gson.Gson;
 import org.jetbrains.annotations.NotNull;
-import server.BadRequestException;
 
 public record JoinGameRequest (ChessGame.TeamColor playerColor, Integer gameID){
 

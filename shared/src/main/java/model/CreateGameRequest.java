@@ -1,7 +1,5 @@
 package model;
 
-import server.BadRequestException;
-
 public record CreateGameRequest(String gameName) {
 
     public void check(){
