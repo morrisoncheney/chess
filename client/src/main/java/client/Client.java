@@ -1,5 +1,6 @@
 package client;
 
+import chess.ChessBoard;
 import chess.ChessGame;
 
 import java.util.Arrays;
@@ -8,6 +9,7 @@ import java.util.Scanner;
 import exception.ResponseException;
 import model.*;
 import static ui.EscapeSequences.*;
+import ui.BoardPrinter;
 
 public class Client {
     private ServerFacade server;
@@ -17,6 +19,7 @@ public class Client {
     private Integer currGameID;
     private ChessGame.TeamColor userColor;
     private String activeUsername;
+    private ChessBoard genericChessBoard = new ChessBoard();
 
     public Client(String serverUrl) throws ResponseException {
         server = new ServerFacade(serverUrl);
@@ -62,6 +65,7 @@ public class Client {
                 case "create" -> create(params);
                 case "list" -> listGames();
                 case "play" -> join();
+                case "observer" -> observe();
                 case "logout" -> signOut();
                 case "clear" -> clearDB();
                 case "quit" -> "quit";
@@ -130,10 +134,27 @@ public class Client {
     public String join(String... params) throws ResponseException {
         assertSignedIn();
         if (params.length == 2) {
-            server.join(Integer.valueOf(params[0]), ChessGame.TeamColor.valueOf(params[1]), userAuth);
-
+            ChessGame.TeamColor color = ChessGame.TeamColor.valueOf(params[1]);
+            server.join(Integer.valueOf(params[0]), color, userAuth);
+            genericChessBoard.resetBoard();
+            BoardPrinter.printChessBoard(genericChessBoard, color);
+            userColor = color;
             return "Successfully joined.";
         }
+        throw new ResponseException(ResponseException.Code.ClientError, "Expected: <gameID> <WHITE|BLACK>");
+    }
+
+    public String observe(String... params) throws ResponseException {
+        assertSignedIn();
+        if (params.length == 1) {
+            ChessGame.TeamColor color = ChessGame.TeamColor.WHITE;
+
+            genericChessBoard.resetBoard();
+            BoardPrinter.printChessBoard(genericChessBoard, color);
+
+            return "Successfully observed.";
+        }
+        throw new ResponseException(ResponseException.Code.ClientError, "Expected: <gameID>");
     }
 
     public String signOut() throws ResponseException {
@@ -150,12 +171,13 @@ public class Client {
 
     public String clearDB() throws ResponseException {
         assertSignedIn();
-        if (activeUsername == "mo") {
+        if (activeUsername.equals("mo")) {
             state = State.SIGNEDOUT;
             server.clear();
             return "Bye bye everything.";
         } else {
-            return "Judo Chop failed.";
+            return "Naughty naughty.\nThe international man of mystery frowns upon you.\n\n" +
+                    "Yeah baby, yeah!\n";
         }
     }
 
