@@ -103,7 +103,7 @@ public class Client {
             activeUsername = auth.username();
 
             state = State.SIGNEDIN;
-            return String.format("Registration successful.\nWelcome to 240 Chess %s.\n", username) + help();
+            return String.format("Registration successful.\n\nWelcome to 240 Chess %s.\n", username) + help();
         }
         throw new ResponseException(ResponseException.Code.ClientError, "Expected: <username> <password> <email>");
     }
@@ -133,8 +133,17 @@ public class Client {
 
     public String join(String... params) throws ResponseException {
         assertSignedIn();
+
+        ChessGame.TeamColor color;
+
         if (params.length == 2) {
-            ChessGame.TeamColor color = ChessGame.TeamColor.valueOf(params[1]);
+            if (params[1].equals("WHITE")){
+                color = ChessGame.TeamColor.WHITE;
+            } else if (params[1].equals("BLACK")) {
+                color = ChessGame.TeamColor.BLACK;
+            } else {
+                throw new ResponseException(ResponseException.Code.ClientError, "Expected: <gameID> <WHITE|BLACK>");
+            }
             server.join(Integer.valueOf(params[0]), color, userAuth);
             genericChessBoard.resetBoard();
             BoardPrinter.printChessBoard(genericChessBoard, color);
