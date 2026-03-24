@@ -16,7 +16,6 @@ public class Client {
     private State state = State.SIGNEDOUT;
 
     private String userAuth;
-    private Integer currGameID;
     private ChessGame.TeamColor userColor;
     private String activeUsername;
     private ChessBoard genericChessBoard = new ChessBoard();
@@ -64,8 +63,8 @@ public class Client {
                 case "register" -> register(params);
                 case "create" -> create(params);
                 case "list" -> listGames();
-                case "play" -> join();
-                case "observer" -> observe();
+                case "play" -> join(params);
+                case "observe" -> observe(params);
                 case "logout" -> signOut();
                 case "clear" -> clearDB();
                 case "quit" -> "quit";
@@ -114,9 +113,10 @@ public class Client {
         var result = new StringBuilder();
 
         for (GameDataListItem game : games.games()) {
-
-            result.append(String.format("ID:%d Name:%s\n" +
-                    "   White:%s Black:%s", game.gameID(), game.gameName(),game.whiteUsername(),game.blackUsername())).append("\n\n");
+            String whiteUsername = game.whiteUsername();
+            String blackUsername = game.blackUsername();
+            result.append(String.format("ID[%d] Name[%s]\n" +
+                    "   White[%s] Black[%s]", game.gameID(), game.gameName(), whiteUsername, blackUsername)).append("\n\n");
         }
         return result.toString();
     }
@@ -134,17 +134,11 @@ public class Client {
     public String join(String... params) throws ResponseException {
         assertSignedIn();
 
-        ChessGame.TeamColor color;
-
         if (params.length == 2) {
-            if (params[1].equals("WHITE")){
-                color = ChessGame.TeamColor.WHITE;
-            } else if (params[1].equals("BLACK")) {
-                color = ChessGame.TeamColor.BLACK;
-            } else {
-                throw new ResponseException(ResponseException.Code.ClientError, "Expected: <gameID> <WHITE|BLACK>");
-            }
-            server.join(Integer.valueOf(params[0]), color, userAuth);
+            Integer gameID = Integer.valueOf(params[0]);
+            ChessGame.TeamColor color = ChessGame.TeamColor.valueOf(params[1].toUpperCase());
+
+            server.join(gameID, color, userAuth);
             genericChessBoard.resetBoard();
             BoardPrinter.printChessBoard(genericChessBoard, color);
             userColor = color;
@@ -193,14 +187,14 @@ public class Client {
 
     public String help() {
         if (state == State.SIGNEDOUT) {
-            return """
+            return SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_WHITE + """
                     - register <username> <password> <email>
                     - login <username> <password>
                     - help
                     - quit
-                    """;
+                    """ + RESET_BG_COLOR + SET_TEXT_COLOR_BLACK;
         }
-        return """
+        return SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + """
                 - create <gameName>
                 - list
                 - play <gameID> <WHITE|BLACK>
@@ -208,7 +202,7 @@ public class Client {
                 - logout
                 - help
                 - quit
-                """;
+                """ + RESET_BG_COLOR + SET_TEXT_COLOR_BLACK;
     }
 
     private void assertSignedIn() throws ResponseException {

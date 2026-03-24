@@ -37,9 +37,10 @@ public class ServerFacade {
         return handleResponse(response, CreateGameResult.class);
     }
 
-    public void join(Integer gameID, ChessGame.TeamColor color, String authToken) throws ResponseException{
-        var request = buildRequest("POST", "/game", new JoinGameRequest(color, gameID), authToken);
+    public void join(Integer gameID, ChessGame.TeamColor color, String authToken) throws ResponseException {
+        var request = buildRequest("PUT", "/game", new JoinGameRequest(color, gameID), authToken);
         var response = sendRequest(request);
+        handleResponse(response, null);
     }
 
     public void logout(String auth) throws ResponseException{ // the auth is in the header somehow
