@@ -27,7 +27,7 @@ public class Handler {
 
         try {
             user = new Gson().fromJson(ctx.body(), UserData.class);
-        } catch (Error e) {
+        } catch (Exception e) {
             throw new BadRequestException("bad request");
         }
 
@@ -43,7 +43,7 @@ public class Handler {
 
         try {
             log = new Gson().fromJson(ctx.body(), LoginRequest.class);
-        } catch (Error e) {
+        } catch (Exception e) {
             throw new BadRequestException("bad request");
         }
 
@@ -89,7 +89,7 @@ public class Handler {
         JoinGameRequest request;
         try {
             request = new Gson().fromJson(ctx.body(), JoinGameRequest.class);
-        } catch (Error e) {
+        } catch (Exception e) {
             throw new BadRequestException("bad request");
         }
 
@@ -106,7 +106,7 @@ public class Handler {
 
         try {
             gameNameHolder = new Gson().fromJson(ctx.body(), CreateGameRequest.class);
-        } catch (Error e) {
+        } catch (Exception e) {
             throw new BadRequestException("bad request");
         }
 
@@ -120,7 +120,7 @@ public class Handler {
 
         try {
             auth = ctx.header("Authorization");
-        } catch (Error e) {
+        } catch (Exception e) {
             throw new BadRequestException("bad request");
         }
 
