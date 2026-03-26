@@ -19,6 +19,8 @@ public class Client {
     private ChessGame.TeamColor userColor;
     private String activeUsername;
     private ChessBoard genericChessBoard = new ChessBoard();
+    private int maxGameID = 0; // get max game num and save it so observe won't work for that
+    // should only accept ints
 
     public Client(String serverUrl) throws ResponseException {
         server = new ServerFacade(serverUrl);
@@ -26,13 +28,13 @@ public class Client {
 
     public void run() {
         System.out.println(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_WHITE + WHITE_KING +
-                " 240 Chess ClientMain. Sign in to start." + SET_TEXT_COLOR_BLACK + BLACK_KING
+                " 240 Chess Client. Sign in to start." + SET_TEXT_COLOR_BLACK + BLACK_KING
                 + SET_TEXT_COLOR_WHITE);
         System.out.print(help());
 
         Scanner scanner = new Scanner(System.in);
         String result = "";
-        while (!result.equals("quit")) {
+        while (!result.equals("Bye bye.")) {
             printPrompt();
             String line = scanner.nextLine();
 
@@ -67,7 +69,7 @@ public class Client {
                 case "observe" -> observe(params);
                 case "logout" -> signOut();
                 case "clear" -> clearDB();
-                case "quit" -> "quit";
+                case "quit" -> "Bye bye.";
                 default -> help();
             };
         } catch (Exception ex) {
@@ -117,6 +119,9 @@ public class Client {
             String blackUsername = game.blackUsername();
             result.append(String.format("ID[%d] Name[%s]\n" +
                     "   White[%s] Black[%s]", game.gameID(), game.gameName(), whiteUsername, blackUsername)).append("\n\n");
+            if (game.gameID() > maxGameID) {
+                maxGameID = game.gameID();
+            }
         }
         return result.toString();
     }
@@ -135,8 +140,23 @@ public class Client {
         assertSignedIn();
 
         if (params.length == 2) {
-            Integer gameID = Integer.valueOf(params[0]);
-            ChessGame.TeamColor color = ChessGame.TeamColor.valueOf(params[1].toUpperCase());
+            Integer gameID;
+            try {
+                gameID = Integer.valueOf(params[0]);
+            } catch (NumberFormatException e) {
+                throw new ResponseException(ResponseException.Code.ClientError, String.format("%s is an invalid gameID value.", params[0]));
+            }
+            if (gameID > maxGameID) {
+                maxGameID = gameID;
+            }
+            ChessGame.TeamColor color;
+
+            try {
+                color = ChessGame.TeamColor.valueOf(params[1].toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new ResponseException(ResponseException.Code.ClientError, String.format("Expected: <WHITE|BLACK>. %s is an invalid color value.", params[1]));
+            }
+
 
             server.join(gameID, color, userAuth);
             genericChessBoard.resetBoard();
@@ -150,6 +170,16 @@ public class Client {
     public String observe(String... params) throws ResponseException {
         assertSignedIn();
         if (params.length == 1) {
+            Integer gameID;
+            try {
+                gameID = Integer.valueOf(params[0]);
+            } catch (NumberFormatException e) {
+                throw new ResponseException(ResponseException.Code.ClientError, String.format("%s is an invalid gameID value.", params[0]));
+            }
+            if (gameID > maxGameID || gameID < 1) {
+                throw new ResponseException(ResponseException.Code.ClientError, "gameID too high");
+            }
+
             ChessGame.TeamColor color = ChessGame.TeamColor.WHITE;
 
             genericChessBoard.resetBoard();

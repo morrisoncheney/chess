@@ -75,7 +75,7 @@ public class BoardPrinter {
 
             for (int boardCol = 0; boardCol < BOARD_SIZE_IN_SQUARES; ++boardCol) {
 
-                if ((boardRow + boardCol) % 2 == color) {
+                if ((boardRow + boardCol) % 2 == 1) { // just removed color thing (CODE QUALITY CHECK)
                     setLightGrey(out);
 
                 } else {
