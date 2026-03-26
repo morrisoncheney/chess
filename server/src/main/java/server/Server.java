@@ -8,6 +8,7 @@ import io.javalin.http.Context;
 import io.javalin.http.ForbiddenResponse;
 import io.javalin.http.UnauthorizedResponse;
 import server.handlers.Handler;
+import server.websocket.WebSocketHandler;
 import service.Service;
 import model.BadRequestException;
 
@@ -17,6 +18,8 @@ import java.util.Map;
 public class Server {
 
     private final Javalin javalin;
+
+    private final WebSocketHandler webSocketHandler = new WebSocketHandler();
 
     private final Handler handler = new Handler(new Service(new MySqlDataAccess()));
 
@@ -33,7 +36,11 @@ public class Server {
                 .post("/game",this::createGame)
                 .put("/game",this::joinGame)
                 .error(404, this::notFound)
-                    ;
+                .ws("/ws", ws -> {
+                    ws.onConnect(webSocketHandler);
+                    ws.onMessage(webSocketHandler);
+                    ws.onClose(webSocketHandler);
+                });
 
         addExceptions();
 
