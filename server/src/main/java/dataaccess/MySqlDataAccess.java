@@ -193,6 +193,13 @@ public class MySqlDataAccess { // this should use the same method names as Memor
 
     }
 
+    public void updateGame(ChessGame newGame, Integer gameID) {
+        GameData data = getGame(gameID);
+        GameData newData = new GameData(data.gameID(), newGame, data.whiteUsername(), data.blackUsername(), data.gameName());
+
+        replace(gameID, newData);
+    }
+
     public void replaceUser(ChessGame.TeamColor color, String username, Integer gameID) {
         GameData data = getGame(gameID);
 

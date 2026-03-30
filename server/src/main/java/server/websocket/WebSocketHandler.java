@@ -1,9 +1,13 @@
 package server.websocket;
 
+import chess.ChessGame;
+import chess.ChessMove;
+import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.MySqlDataAccess;
 import exception.ResponseException;
 import io.javalin.http.Context;
+import model.GameData;
 import websocket.messages.Notification;
 import io.javalin.websocket.WsCloseContext;
 import io.javalin.websocket.WsCloseHandler;
@@ -36,7 +40,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             UserGameCommand action = new Gson().fromJson(ctx.message(), UserGameCommand.class);
             switch (action.getCommandType()) {
                 case CONNECT -> enter(action.getAuthToken(), ctx.session);
-                case MAKE_MOVE -> makeMove(action.getAuthToken(), action.getGameID(), ctx.session);
+                case MAKE_MOVE -> makeMove(action.getAuthToken(), action.getGameID(), action.getMove(), ctx.session);
                 case LEAVE -> exit(action.visitorName(), ctx.session);
                 case RESIGN -> exit(action.visitorName(), ctx.session);
             }
@@ -64,21 +68,26 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     private void exit(String authToken, Session session) throws IOException {
         AuthData authData = authenticate(authToken);
         var message = String.format("%s left the game", authData.username());
-        var notification = new Notification(Notification.Type.EXIT, message);
-        connections.broadcast(session, notification); // yeah we need to change the broadcast here
+//        var notification = new Notification(Notification.Type.EXIT, message);
+//        connections.broadcast(session, notification); // yeah we need to change the broadcast here
         connections.remove(session);
     }
 
-    public void makeMove(String authToken, int gameID, Session session) throws ResponseException {
+    public void makeMove(String authToken, int gameID, ChessMove move, Session session) throws InvalidMoveException {
         AuthData auth = authenticate(authToken);
+        GameData gameData = dataAccess.getGame(gameID);
+        ChessGame game = gameData.game();
+        game.makeMove(move);
+        dataAccess.
         try {
-            var message = String.format("%s joins %d", auth.username(), gameID);
-            var notification = new Notification(Notification.Type.MOVE, message);
+
+//            var message = String.format("%s joins %d", auth.username(), gameID);
+//            var notification = new Notification(Notification.Type.MOVE, message);
             // instead of notifying users, we want to actually implement the moves.
-            connections.broadcast(null, notification);
+//            connections.broadcast(null, notification);
             // the above line needs to change. we don't want to notify everyone.
         } catch (Exception ex) {
-            throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
+//            throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
             // this exception needs to be changed to throw the right error code number becuase
             // my code doesn't actually look at the response exceptions error types.
         }
