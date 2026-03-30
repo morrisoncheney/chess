@@ -1,21 +1,27 @@
 package server.websocket;
 
 import com.google.gson.Gson;
+import dataaccess.MySqlDataAccess;
 import exception.ResponseException;
+import io.javalin.http.Context;
+import websocket.messages.Notification;
 import io.javalin.websocket.WsCloseContext;
 import io.javalin.websocket.WsCloseHandler;
 import io.javalin.websocket.WsConnectContext;
 import io.javalin.websocket.WsConnectHandler;
 import io.javalin.websocket.WsMessageContext;
 import io.javalin.websocket.WsMessageHandler;
+import model.AuthData;
 import org.eclipse.jetty.websocket.api.Session;
+import service.Service;
 import websocket.commands.UserGameCommand;
-import websocket.messages.ServerMessage;
 
 import java.io.IOException;
 
 public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
 
+    MySqlDataAccess dataAccess = new MySqlDataAccess();
+    private final Service service = new Service(dataAccess);
     private final ConnectionManager connections = new ConnectionManager();
 
     @Override
@@ -27,10 +33,12 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     @Override
     public void handleMessage(WsMessageContext ctx) {
         try {
-            Action action = new Gson().fromJson(ctx.message(), Action.class);
-            switch (action.type()) {
-                case ENTER -> enter(action.visitorName(), ctx.session);
-                case EXIT -> exit(action.visitorName(), ctx.session);
+            UserGameCommand action = new Gson().fromJson(ctx.message(), UserGameCommand.class);
+            switch (action.getCommandType()) {
+                case CONNECT -> enter(action.getAuthToken(), ctx.session);
+                case MAKE_MOVE -> makeMove(action.getAuthToken(), action.getGameID(), ctx.session);
+                case LEAVE -> exit(action.visitorName(), ctx.session);
+                case RESIGN -> exit(action.visitorName(), ctx.session);
             }
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -42,27 +50,41 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         System.out.println("Websocket closed");
     }
 
-    private void enter(String visitorName, Session session) throws IOException {
+    private void enter(String authToken, Session session) throws IOException {
         connections.add(session);
-        var message = String.format("%s is in the shop", visitorName);
-        var notification = new Notification(Notification.Type.ARRIVAL, message);
+
+        AuthData auth = authenticate(authToken);
+
+        var message = String.format("%s is connected.", auth.username());
+        var notification = new Notification(Notification.Type.ENTER, message);
         connections.broadcast(session, notification);
+        // THIS LINE NEEDS TO CHANGE TO ONLY NOTIFY ANOTHER USER IN THAT GAME IF THERE IS ONE
     }
 
-    private void exit(String visitorName, Session session) throws IOException {
-        var message = String.format("%s left the shop", visitorName);
-        var notification = new Notification(Notification.Type.DEPARTURE, message);
-        connections.broadcast(session, notification);
+    private void exit(String authToken, Session session) throws IOException {
+        AuthData authData = authenticate(authToken);
+        var message = String.format("%s left the game", authData.username());
+        var notification = new Notification(Notification.Type.EXIT, message);
+        connections.broadcast(session, notification); // yeah we need to change the broadcast here
         connections.remove(session);
     }
 
-    public void makeNoise(String petName, String sound) throws ResponseException {
+    public void makeMove(String authToken, int gameID, Session session) throws ResponseException {
+        AuthData auth = authenticate(authToken);
         try {
-            var message = String.format("%s says %s", petName, sound);
-            var notification = new Notification(Notification.Type.NOISE, message);
+            var message = String.format("%s joins %d", auth.username(), gameID);
+            var notification = new Notification(Notification.Type.MOVE, message);
+            // instead of notifying users, we want to actually implement the moves.
             connections.broadcast(null, notification);
+            // the above line needs to change. we don't want to notify everyone.
         } catch (Exception ex) {
             throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
+            // this exception needs to be changed to throw the right error code number becuase
+            // my code doesn't actually look at the response exceptions error types.
         }
+    }
+
+    public AuthData authenticate(String auth) {
+        return service.authenticate(auth);
     }
 }
