@@ -7,8 +7,8 @@ import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ConnectionManager {
-    public final ConcurrentHashMap<Session, Session> connections = new ConcurrentHashMap<>();
-
+    public final ConcurrentHashMap<String, Connection> connections = new ConcurrentHashMap<>();
+        // the String key is an authToken, and the authToken in Conneciton is the other User's
     public void add(Session session) {
         connections.put(session, session);
     }
@@ -17,14 +17,16 @@ public class ConnectionManager {
         connections.remove(session);
     }
 
-    public void broadcast(Session excludeSession, Notification notification) throws IOException {
+    public void broadcastToGame(String authToken, Notification notification) throws IOException {
         String msg = notification.toString();
-        for (Session c : connections.values()) {
-            if (c.isOpen()) {
-                if (!c.equals(excludeSession)) {
-                    c.getRemote().sendString(msg);
-                }
-            }
-        }
+
+        connections.get(authToken);
+//        for (Connection c : connections.values()) {
+//            if (c.getAuthToken().isOpen()) {
+//                if (!c.equals(excludeSession)) {
+//                    c.getRemote().sendString(msg);
+//                }
+//            }
+//        }
     }
 }

@@ -35,14 +35,14 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     @Override
-    public void handleMessage(WsMessageContext ctx) {
+    public void handleMessage(WsMessageContext ctx) throws Exception {
         try {
             UserGameCommand action = new Gson().fromJson(ctx.message(), UserGameCommand.class);
             switch (action.getCommandType()) {
-                case CONNECT -> enter(action.getAuthToken(), ctx.session);
+                case CONNECT -> enter(action.getAuthToken(), action.getGameID(), action.get ctx.session);
                 case MAKE_MOVE -> makeMove(action.getAuthToken(), action.getGameID(), action.getMove(), ctx.session);
-                case LEAVE -> exit(action.visitorName(), ctx.session);
-                case RESIGN -> exit(action.visitorName(), ctx.session);
+                case LEAVE -> exit(action.getAuthToken(), ctx.session);
+                case RESIGN -> resign(action.getAuthToken(), action.getGameID(), ctx.session);
             }
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -58,10 +58,10 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         connections.add(session);
 
         AuthData auth = authenticate(authToken);
-
+        dataAccess.replaceUser();
         var message = String.format("%s is connected.", auth.username());
         var notification = new Notification(Notification.Type.ENTER, message);
-        connections.broadcast(session, notification);
+        connections.broadcastToGame(authToken, notification);
         // THIS LINE NEEDS TO CHANGE TO ONLY NOTIFY ANOTHER USER IN THAT GAME IF THERE IS ONE
     }
 
@@ -78,7 +78,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         GameData gameData = dataAccess.getGame(gameID);
         ChessGame game = gameData.game();
         game.makeMove(move);
-        dataAccess.
+        dataAccess.updateGame(game, gameID);
         try {
 
 //            var message = String.format("%s joins %d", auth.username(), gameID);
@@ -88,9 +88,19 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             // the above line needs to change. we don't want to notify everyone.
         } catch (Exception ex) {
 //            throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
-            // this exception needs to be changed to throw the right error code number becuase
+            // this exception needs to be changed to throw the right error code number because
             // my code doesn't actually look at the response exceptions error types.
         }
+    }
+
+    private void resign(String authToken, Session session) throws IOException {
+        // this is a placeholder
+        AuthData authData = authenticate(authToken);
+        var message = String.format("%s resigned the game.", authData.username());
+        var notification = new Notification(Notification.Type.EXIT, message);
+        connections.broadcast(session, notification); // inform other user of win, and curr user of loss
+        // delete the game from the db as well probably too.
+        connections.remove(session);
     }
 
     public AuthData authenticate(String auth) {
