@@ -58,9 +58,9 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         AuthData auth = authenticate(authToken);
 
         connections.addUser(gameID, auth.username(), color, session);
-
+        ChessGame game = dataAccess.getGame(gameID).game();
         var message = String.format("%s is connected as %s.", auth.username(), color.toString());
-        var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, null, color, message);
+        var notification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, game, color, message);
 
         connections.broadcastToGame(gameID, notification);
     }

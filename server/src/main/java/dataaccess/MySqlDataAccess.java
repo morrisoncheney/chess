@@ -70,15 +70,15 @@ public class MySqlDataAccess { // this should use the same method names as Memor
 /////////////////////////////////////////////////////////////////////
 
     public void addAuth(AuthData auth) {
-        var statement = "INSERT INTO auths (username, white) VALUES (?, ?)";
+        var statement = "INSERT INTO auths (auth, username) VALUES (?, ?)";
 
-        runUpdate(statement, auth.username(), auth.authToken());
+        runUpdate(statement, auth.authToken(), auth.username());
     }
 
     public AuthData getAuth(String authToken) {
         try (Connection conn = DatabaseManager.getConnection()) {
 
-            var statement = "SELECT username FROM auths WHERE authToken=?";
+            var statement = "SELECT username FROM auths WHERE auth=?";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
 
                 ps.setString(1, authToken);
@@ -96,12 +96,12 @@ public class MySqlDataAccess { // this should use the same method names as Memor
     }
 
     public void deleteAuth(String authToken) {
-        var statement = "DELETE FROM auths WHERE white=?";
+        var statement = "DELETE FROM auths WHERE auth=?";
         runUpdate(statement, authToken);
     }
 
     public void deleteAllAuthData() {
-        var statement = "TRUNCATE auths";
+        var statement = "DROP TABLE auths";
         runUpdate(statement);
     }
 
@@ -237,9 +237,9 @@ public class MySqlDataAccess { // this should use the same method names as Memor
         """,
         """
         CREATE TABLE IF NOT EXISTS auths (
-            `white` varchar(256) NOT NULL,
+            `auth` varchar(256) NOT NULL,
             `username` varchar(256) NOT NULL,
-            PRIMARY KEY (`white`)
+            PRIMARY KEY (`auth`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
         """,
         """

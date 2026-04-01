@@ -3,5 +3,6 @@ package client;
 public enum State {
     SIGNEDOUT,
     SIGNEDIN,
-    IN_GAME
+    IN_GAME,
+    OBSERVING
 }

@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Scanner;
 
 import client.websocket.ClientNotificationHandler;
+import client.websocket.NotificationHandler;
 import client.websocket.WebSocketFacade;
 import exception.ResponseException;
 import model.*;
@@ -14,7 +15,7 @@ import static ui.EscapeSequences.*;
 import ui.BoardPrinter;
 import websocket.messages.ServerMessage;
 
-public class Client {
+public class Client implements NotificationHandler {
     private ServerFacade server;
     private WebSocketFacade ws;
     private State state = State.SIGNEDOUT;
@@ -29,7 +30,7 @@ public class Client {
 
     public Client(String serverUrl) throws ResponseException {
         server = new ServerFacade(serverUrl);
-        ws = new WebSocketFacade(serverUrl, new ClientNotificationHandler());
+        ws = new WebSocketFacade(serverUrl, this);
     }
 
     public void run() {
@@ -55,7 +56,7 @@ public class Client {
         System.out.println();
     }
 
-    private void printPrompt() {
+    private void printPrompt() { //
         System.out.print( ERASE_SCREEN + "\n" + SET_BG_COLOR_BLACK
                 + SET_TEXT_COLOR_WHITE + "[" + state + "]>>> " + SET_TEXT_COLOR_BLUE);
     }
@@ -71,11 +72,11 @@ public class Client {
                 case "register" -> register(params);
                 case "create" -> create(params);
                 case "list" -> listGames();
-                case "play" -> join(params);
+                case "join" -> join(params);
                 case "observe" -> observe(params);
 //                case "move" ->
 //                case "resign" ->
-//                case "taunt" ->
+//                case "see_moves" ->
 //                case "leave" ->
                 case "logout" -> signOut();
                 case "clear" -> clearDB();
@@ -171,9 +172,8 @@ public class Client {
             server.join(gameID, color, userAuth);
             ws.enter(userAuth, gameID, color);
             currGameID = gameID;
-            genericChessBoard.resetBoard();
-            BoardPrinter.printChessBoard(genericChessBoard, color);
             userColor = color;
+            state = State.IN_GAME;
             return "Successfully joined.";
         }
         throw new ResponseException(ResponseException.Code.ClientError, "Expected: <gameID> <WHITE|BLACK>");
@@ -192,10 +192,7 @@ public class Client {
                 throw new ResponseException(ResponseException.Code.ClientError, "gameID too high");
             }
 
-            ChessGame.TeamColor color = ChessGame.TeamColor.WHITE;
-
-            genericChessBoard.resetBoard();
-            BoardPrinter.printChessBoard(genericChessBoard, color);
+            state = State.OBSERVING;
 
             return "Successfully observed.";
         }
@@ -228,6 +225,13 @@ public class Client {
 
 
     public String help() {
+        String observing = SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + """
+                - see_moves
+                - leave
+                - logout
+                - help
+                - quit
+                """ + RESET_BG_COLOR + SET_TEXT_COLOR_BLACK;
         if (state == State.SIGNEDOUT) {
             return SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_WHITE + """
                     - register <username> <password> <email>
@@ -235,11 +239,18 @@ public class Client {
                     - help
                     - quit
                     """ + RESET_BG_COLOR + SET_TEXT_COLOR_BLACK;
+        } else if (state == State.IN_GAME) {
+            return SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + """
+                - see_moves
+                - move
+                """ + observing;
+        } else if (state == State.OBSERVING) {
+            return observing;
         }
         return SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + """
                 - create <gameName>
                 - list
-                - play <gameID> <WHITE|BLACK>
+                - join <gameID> <WHITE|BLACK>
                 - observe <gameID>
                 - logout
                 - help
@@ -258,4 +269,33 @@ public class Client {
             throw new ResponseException(ResponseException.Code.ClientError, String.format("You must sign out to %s.", tryingTo));
         }
     }
+
+    public void notify(ServerMessage msg) {
+        switch (msg.getServerMessageType()) {
+            case LOAD_GAME -> loadGame(msg);
+            case ERROR -> printError(msg);
+            case NOTIFICATION -> printMessage(msg);
+            case ENTER -> loadGame(msg);
+        }
+    }
+
+    public void loadGame(ServerMessage msg) {
+        System.out.println("Incoming...\n");
+        ChessGame game = msg.getGame();
+
+        BoardPrinter.printChessBoard(game.getBoard(), msg.getColor());
+        System.out.println(msg.getMsg());
+        printPrompt();
+    }
+
+    public void printError(ServerMessage msg) {
+        System.out.println("Incoming...\nError: " + msg.getMsg());
+        printPrompt();
+    }
+
+    public void printMessage(ServerMessage msg) {
+        System.out.println("Incoming...\n" + msg.getMsg());
+        printPrompt();
+    }
+
 }

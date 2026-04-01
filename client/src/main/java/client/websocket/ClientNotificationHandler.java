@@ -10,7 +10,7 @@ public class ClientNotificationHandler implements NotificationHandler{
             case LOAD_GAME -> loadGame(notification);
             case ERROR -> printError(notification);
             case NOTIFICATION -> printMessage(notification);
-            case ENTER -> enterMessage(notification);
+            case ENTER -> loadGame(notification);
         }
     }
 
@@ -26,10 +26,6 @@ public class ClientNotificationHandler implements NotificationHandler{
     }
 
     public void printMessage(ServerMessage msg) {
-        System.out.println(msg.getMsg());
-    }
-
-    public void enterMessage(ServerMessage msg) {
         System.out.println(msg.getMsg());
     }
 }
