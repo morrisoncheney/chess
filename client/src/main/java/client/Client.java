@@ -6,6 +6,7 @@ import chess.ChessGame;
 import java.util.Arrays;
 import java.util.Scanner;
 
+import client.websocket.ClientNotificationHandler;
 import client.websocket.WebSocketFacade;
 import exception.ResponseException;
 import model.*;
@@ -19,6 +20,7 @@ public class Client {
     private State state = State.SIGNEDOUT;
 
     private String userAuth;
+    Integer currGameID = null;
     private ChessGame.TeamColor userColor;
     private String activeUsername;
     private ChessBoard genericChessBoard = new ChessBoard();
@@ -27,7 +29,7 @@ public class Client {
 
     public Client(String serverUrl) throws ResponseException {
         server = new ServerFacade(serverUrl);
-        ws = new WebSocketFacade(serverUrl, );
+        ws = new WebSocketFacade(serverUrl, new ClientNotificationHandler());
     }
 
     public void run() {
@@ -167,7 +169,8 @@ public class Client {
 
 
             server.join(gameID, color, userAuth);
-            ws.enter
+            ws.enter(userAuth, gameID, color);
+            currGameID = gameID;
             genericChessBoard.resetBoard();
             BoardPrinter.printChessBoard(genericChessBoard, color);
             userColor = color;

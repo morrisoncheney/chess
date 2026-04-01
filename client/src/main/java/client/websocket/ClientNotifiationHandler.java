@@ -3,15 +3,14 @@ package client.websocket;
 import chess.ChessGame;
 import websocket.messages.ServerMessage;
 import ui.BoardPrinter;
-import client.Client.loadGame;
 
-public class ClientNotifiationHandler {
+public class ClientNotificationHandler implements NotificationHandler{
     public void notify(ServerMessage notification) {
         switch (notification.getServerMessageType()) {
             case LOAD_GAME -> loadGame(notification);
             case ERROR -> printError(notification);
             case NOTIFICATION -> printMessage(notification);
-            case ENTER -> enter(notification);
+            case ENTER -> enterMessage(notification);
         }
     }
 
@@ -30,7 +29,7 @@ public class ClientNotifiationHandler {
         System.out.println(msg.getMsg());
     }
 
-    public void enter(ServerMessage msg) {
+    public void enterMessage(ServerMessage msg) {
         System.out.println(msg.getMsg());
     }
 }
