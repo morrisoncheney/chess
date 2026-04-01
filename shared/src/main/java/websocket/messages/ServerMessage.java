@@ -43,6 +43,10 @@ public class ServerMessage {
         return game;
     }
 
+    public ChessGame.TeamColor getColor() {
+        return this.color;
+    }
+
     public String getMsg() {
         return msg;
     }

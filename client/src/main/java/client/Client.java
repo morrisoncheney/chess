@@ -11,6 +11,7 @@ import exception.ResponseException;
 import model.*;
 import static ui.EscapeSequences.*;
 import ui.BoardPrinter;
+import websocket.messages.ServerMessage;
 
 public class Client {
     private ServerFacade server;
