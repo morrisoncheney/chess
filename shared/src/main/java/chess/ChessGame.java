@@ -14,6 +14,8 @@ public class ChessGame {
     ChessBoard board = new ChessBoard();
     TeamColor currentTurn;
 
+    TeamColor resigned;
+
     public ChessGame() {
         this.board.resetBoard();
         currentTurn = TeamColor.WHITE;
@@ -67,6 +69,10 @@ public class ChessGame {
     }
 
     public void makeMove(ChessMove move) throws InvalidMoveException {
+
+        if (resigned != null) {
+            throw new InvalidMoveException(String.format("the game is over, %s resigned.", this.resigned));
+        }
 
         ChessPiece p = this.board.getPiece(move.getStartPosition());
         if (p == null) {
@@ -202,6 +208,10 @@ public class ChessGame {
      */
     public ChessBoard getBoard() {
         return this.board;
+    }
+
+    public void resignation(TeamColor color) {
+        this.resigned = color;
     }
 
     @Override
