@@ -6,6 +6,7 @@ import chess.ChessGame;
 import java.util.Arrays;
 import java.util.Scanner;
 
+import client.websocket.WebSocketFacade;
 import exception.ResponseException;
 import model.*;
 import static ui.EscapeSequences.*;
@@ -13,6 +14,7 @@ import ui.BoardPrinter;
 
 public class Client {
     private ServerFacade server;
+    private WebSocketFacade ws;
     private State state = State.SIGNEDOUT;
 
     private String userAuth;
@@ -24,6 +26,7 @@ public class Client {
 
     public Client(String serverUrl) throws ResponseException {
         server = new ServerFacade(serverUrl);
+        ws = new WebSocketFacade(serverUrl, );
     }
 
     public void run() {
@@ -67,6 +70,10 @@ public class Client {
                 case "list" -> listGames();
                 case "play" -> join(params);
                 case "observe" -> observe(params);
+//                case "move" ->
+//                case "resign" ->
+//                case "taunt" ->
+//                case "leave" ->
                 case "logout" -> signOut();
                 case "clear" -> clearDB();
                 case "quit" -> "Bye bye.";
@@ -159,6 +166,7 @@ public class Client {
 
 
             server.join(gameID, color, userAuth);
+            ws.enter
             genericChessBoard.resetBoard();
             BoardPrinter.printChessBoard(genericChessBoard, color);
             userColor = color;

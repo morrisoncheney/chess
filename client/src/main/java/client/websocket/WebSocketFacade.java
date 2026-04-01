@@ -1,5 +1,7 @@
 package client.websocket;
 
+import chess.ChessGame;
+import chess.ChessMove;
 import com.google.gson.Gson;
 import exception.ResponseException;
 import jakarta.websocket.*;
@@ -29,7 +31,7 @@ public class WebSocketFacade extends Endpoint {
             this.session.addMessageHandler(new MessageHandler.Whole<String>() {
                 @Override
                 public void onMessage(String message) {
-                    Notification notification = new Gson().fromJson(message, Notification.class);
+                    ServerMessage notification = new Gson().fromJson(message, ServerMessage.class);
                     notificationHandler.notify(notification);
                 }
             });
@@ -43,18 +45,60 @@ public class WebSocketFacade extends Endpoint {
     public void onOpen(Session session, EndpointConfig endpointConfig) {
     }
 
-    public void enterPetShop(String visitorName) throws ResponseException {
+    public void enter(String authToken, int gameID, ChessGame.TeamColor color) throws ResponseException {
         try {
-            var action = new Action(Action.Type.ENTER, visitorName);
+            UserGameCommand action = new UserGameCommand(
+                    UserGameCommand.CommandType.CONNECT,
+                    authToken,
+                    gameID,
+                    null,
+                    color
+            );
             this.session.getBasicRemote().sendText(new Gson().toJson(action));
         } catch (IOException ex) {
             throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
         }
     }
 
-    public void leavePetShop(String visitorName) throws ResponseException {
+    public void exit(String authToken, int gameID, ChessGame.TeamColor color) throws ResponseException {
         try {
-            var action = new Action(Action.Type.EXIT, visitorName);
+            UserGameCommand action = new UserGameCommand(
+                    UserGameCommand.CommandType.LEAVE,
+                    authToken,
+                    gameID,
+                    null,
+                    color
+            );
+            this.session.getBasicRemote().sendText(new Gson().toJson(action));
+        } catch (IOException ex) {
+            throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
+        }
+    }
+
+    public void makeMove(String authToken, int gameID, ChessMove move, ChessGame.TeamColor color) throws ResponseException {
+        try {
+            UserGameCommand action = new UserGameCommand(
+                    UserGameCommand.CommandType.MAKE_MOVE,
+                    authToken,
+                    gameID,
+                    move,
+                    color
+            );
+            this.session.getBasicRemote().sendText(new Gson().toJson(action));
+        } catch (IOException ex) {
+            throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
+        }
+    }
+
+    public void resign(String authToken, int gameID, ChessGame.TeamColor color) throws ResponseException {
+        try {
+            UserGameCommand action = new UserGameCommand(
+                    UserGameCommand.CommandType.RESIGN,
+                    authToken,
+                    gameID,
+                    null,
+                    color
+            );
             this.session.getBasicRemote().sendText(new Gson().toJson(action));
         } catch (IOException ex) {
             throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
