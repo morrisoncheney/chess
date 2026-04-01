@@ -210,7 +210,10 @@ public class ChessGame {
         return this.board;
     }
 
-    public void resignation(TeamColor color) {
+    public void resignation(TeamColor color) throws InvalidMoveException {
+        if (this.resigned != null) {
+            throw new InvalidMoveException("game already over.");
+        }
         this.resigned = color;
     }
 

@@ -52,7 +52,8 @@ public class ChessPosition {
 
     @Override
     public String toString() {
-        return "P{" + getRow() + ','+ getColumn()+'}';
+        char file = (char) ('a' + getColumn() - 1);
+        return "" + file + getRow();
     }
 }
 

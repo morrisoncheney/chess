@@ -38,16 +38,13 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     @Override
     public void handleMessage(WsMessageContext ctx) throws Exception {
-        try {
-            UserGameCommand action = new Gson().fromJson(ctx.message(), UserGameCommand.class);
-            switch (action.getCommandType()) {
-                case CONNECT -> enter(action.getAuthToken(), action.getGameID(), action.getColor(), ctx.session);
-                case MAKE_MOVE -> makeMove(action.getAuthToken(), action.getGameID(), action.getMove(), ctx.session);
-                case LEAVE -> exit(action.getAuthToken(), action.getGameID(), ctx.session);
-                case RESIGN -> resign(action.getAuthToken(), action.getGameID(), ctx.session);
-            }
-        } catch (IOException ex) {
-            ex.printStackTrace();
+        UserGameCommand action = new Gson().fromJson(ctx.message(), UserGameCommand.class);
+        switch (action.getCommandType()) {
+            case CONNECT -> enter(action.getAuthToken(), action.getGameID(), action.getColor());
+            case MAKE_MOVE -> makeMove(action.getAuthToken(), action.getGameID(),
+                                                                            action.getColor(), action.getMove());
+            case LEAVE -> exit(action.getAuthToken(), action.getGameID(), action.getColor());
+            case RESIGN -> resign(action.getAuthToken(), action.getGameID(), action.getColor());
         }
     }
 
@@ -56,7 +53,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         System.out.println("Websocket closed");
     }
 
-    private void enter(String authToken, int gameID, ChessGame.TeamColor color, Session session) throws IOException {
+    private void enter(String authToken, int gameID, ChessGame.TeamColor color) throws IOException {
         connections.add(new Connection(gameID));
 
         AuthData auth = authenticate(authToken);
@@ -74,7 +71,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         connections.broadcastToGame(gameID, notification);
     }
 
-    private void exit(String authToken, Integer gameID, ChessGame.TeamColor color, Session session) throws IOException {
+    private void exit(String authToken, Integer gameID, ChessGame.TeamColor color) throws IOException {
         AuthData authData = authenticate(authToken);
 
         var message = String.format("%s left the game", authData.username());
@@ -90,37 +87,50 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
     }
 
-    public void makeMove(String authToken, int gameID, ChessMove move, Session session) throws InvalidMoveException {
-        AuthData auth = authenticate(authToken);
+    public void makeMove(
+            String authToken,
+            int gameID,
+            ChessGame.TeamColor color,
+            ChessMove move
+    ) throws InvalidMoveException, IOException {
+
+        AuthData authData = authenticate(authToken);
         GameData gameData = dataAccess.getGame(gameID);
         ChessGame game = gameData.game();
+        if (!(color == game.getBoard().getPiece(move.getStartPosition()).getTeamColor())) {
+            throw new InvalidMoveException("looks like you are working for the wrong team");
+        }
         game.makeMove(move);
         dataAccess.updateGame(game, gameID);
-        try {
+        var message = String.format("%s calls %s [%s] -> %s!",
+                authData.username(),
+                game.getBoard().getPiece(move.getStartPosition()).getPieceType(),
+                move.getStartPosition().toString(),
+                move.getEndPosition().toString()
+                );
+        var notification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, game, color, message);
+        connections.broadcastToGame(gameID, notification);
 
-//            var message = String.format("%s joins %d", auth.username(), gameID);
-//            var notification = new Notification(Notification.Type.MOVE, message);
-            // instead of notifying users, we want to actually implement the moves.
-//            connections.broadcast(null, notification);
-            // the above line needs to change. we don't want to notify everyone.
-        } catch (Exception ex) {
-//            throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
-            // this exception needs to be changed to throw the right error code number because
-            // my code doesn't actually look at the response exceptions error types.
-        }
     }
 
-    private void resign(String authToken, Session session) throws IOException {
+    private void resign(String authToken, Integer gameID, ChessGame.TeamColor color) throws IOException, InvalidMoveException {
         // this is a placeholder
         AuthData authData = authenticate(authToken);
-        var message = String.format("%s resigned the game.", authData.username());
-        var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, null, message);
-        connections.broadcastToGame(authToken, notification); // inform other user of win, and curr user of loss
-        // delete the game from the db as well probably too.
-        connections.removeGame(authToken);
+
+        GameData gameData = dataAccess.getGame(gameID);
+        ChessGame game = gameData.game();
+        game.resignation(color);
+        dataAccess.updateGame(game, gameID);
+
+        var message = String.format("%s (%s) resigned the game.", authData.username(), color);
+        var notification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME,
+                                                                null, null, message);
+        connections.broadcastToGame(gameID, notification); // inform other user of win, and curr user of loss
     }
 
     public AuthData authenticate(String auth) {
         return service.authenticate(auth);
     }
 }
+
+// now I need to make sure that when the client recieves these messages they do the right thing with them.
