@@ -13,7 +13,7 @@ public class ConnectionManager {
     public final ConcurrentHashMap<Integer, Connection> connections = new ConcurrentHashMap<>();
         // the String key is an white, and the white in Connection is the other User's
     public void add(Connection c) {
-        connections.put(c.getGameID(), c);
+        connections.putIfAbsent(c.getGameID(), c);
     }
 
     public void remove(Integer gameID) {
@@ -28,6 +28,16 @@ public class ConnectionManager {
         } else {
             throw new BadRequestException("color can't be null you bot");
         }
+    }
+
+    public void addUser(Integer gameID, String username, ChessGame.TeamColor color, Session session) {
+        Connection c = connections.get(gameID);
+        if (color == ChessGame.TeamColor.WHITE) {
+            c.setWhite(username, session);
+        } else if (color == ChessGame.TeamColor.BLACK) {
+            c.setBlack(username, session);
+        }
+        connections.put(gameID, c);
     }
 
     public void removeUser(Integer gameID, ChessGame.TeamColor color) {

@@ -9,7 +9,6 @@ import exception.ResponseException;
 import io.javalin.http.Context;
 import model.BadRequestException;
 import model.GameData;
-import websocket.messages.Notification;
 import io.javalin.websocket.WsCloseContext;
 import io.javalin.websocket.WsCloseHandler;
 import io.javalin.websocket.WsConnectContext;
@@ -40,7 +39,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     public void handleMessage(WsMessageContext ctx) throws Exception {
         UserGameCommand action = new Gson().fromJson(ctx.message(), UserGameCommand.class);
         switch (action.getCommandType()) {
-            case CONNECT -> enter(action.getAuthToken(), action.getGameID(), action.getColor());
+            case CONNECT -> enter(action.getAuthToken(), action.getGameID(), action.getColor(), ctx.session);
             case MAKE_MOVE -> makeMove(action.getAuthToken(), action.getGameID(),
                                                                             action.getColor(), action.getMove());
             case LEAVE -> exit(action.getAuthToken(), action.getGameID(), action.getColor());
@@ -53,17 +52,12 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         System.out.println("Websocket closed");
     }
 
-    private void enter(String authToken, int gameID, ChessGame.TeamColor color) throws IOException {
+    private void enter(String authToken, int gameID, ChessGame.TeamColor color, Session session) throws IOException {
         connections.add(new Connection(gameID));
 
         AuthData auth = authenticate(authToken);
-        GameData game = dataAccess.getGame(gameID);
-        if ( (auth.username().equals(game.whiteUsername()) && color == ChessGame.TeamColor.WHITE) ||
-             (auth.username().equals(game.blackUsername()) && color == ChessGame.TeamColor.BLACK) ) {
 
-        } else {
-            dataAccess.replaceUser(color, auth.username(), gameID);
-        }
+        connections.addUser(gameID, auth.username(), color, session);
 
         var message = String.format("%s is connected as %s.", auth.username(), color.toString());
         var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, null, color, message);
@@ -104,7 +98,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         dataAccess.updateGame(game, gameID);
         var message = String.format("%s calls %s [%s] -> %s!",
                 authData.username(),
-                game.getBoard().getPiece(move.getStartPosition()).getPieceType(),
+                game.getBoard().getPiece(move.getEndPosition()).getPieceType(),
                 move.getStartPosition().toString(),
                 move.getEndPosition().toString()
                 );
@@ -123,7 +117,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         dataAccess.updateGame(game, gameID);
 
         var message = String.format("%s (%s) resigned the game.", authData.username(), color);
-        var notification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME,
+        var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION,
                                                                 null, null, message);
         connections.broadcastToGame(gameID, notification); // inform other user of win, and curr user of loss
     }
