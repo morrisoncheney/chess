@@ -70,7 +70,7 @@ public class MySqlDataAccess { // this should use the same method names as Memor
 /////////////////////////////////////////////////////////////////////
 
     public void addAuth(AuthData auth) {
-        var statement = "INSERT INTO auths (username, authToken) VALUES (?, ?)";
+        var statement = "INSERT INTO auths (username, white) VALUES (?, ?)";
 
         runUpdate(statement, auth.username(), auth.authToken());
     }
@@ -96,7 +96,7 @@ public class MySqlDataAccess { // this should use the same method names as Memor
     }
 
     public void deleteAuth(String authToken) {
-        var statement = "DELETE FROM auths WHERE authToken=?";
+        var statement = "DELETE FROM auths WHERE white=?";
         runUpdate(statement, authToken);
     }
 
@@ -237,9 +237,9 @@ public class MySqlDataAccess { // this should use the same method names as Memor
         """,
         """
         CREATE TABLE IF NOT EXISTS auths (
-            `authToken` varchar(256) NOT NULL,
+            `white` varchar(256) NOT NULL,
             `username` varchar(256) NOT NULL,
-            PRIMARY KEY (`authToken`)
+            PRIMARY KEY (`white`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
         """,
         """

@@ -29,17 +29,18 @@ public class UserGameCommand {
         this.gameID = gameID;
     }
 
-    public UserGameCommand(CommandType commandType, String authToken, Integer gameID, ChessMove move) {
+    public UserGameCommand
+            (
+                    CommandType commandType,
+                    String authToken,
+                    Integer gameID,
+                    ChessMove move,
+                    ChessGame.TeamColor color
+            ) {
         this.commandType = commandType;
         this.authToken = authToken;
         this.gameID = gameID;
         this.move = move;
-    }
-
-    public UserGameCommand(CommandType commandType, String authToken, Integer gameID, ChessGame.TeamColor color) {
-        this.commandType = commandType;
-        this.authToken = authToken;
-        this.gameID = gameID;
         this.color = color;
     }
 

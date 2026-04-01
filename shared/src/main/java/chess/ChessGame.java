@@ -72,7 +72,7 @@ public class ChessGame {
         if (p == null) {
             throw new InvalidMoveException("You cannot move a nonexistent piece.");
         } else if (p.getTeamColor() != currentTurn) {
-            throw new InvalidMoveException("It is not this team's turn.");
+            throw new InvalidMoveException("It is not your turn.");
         }
 
         TeamColor c = p.getTeamColor();

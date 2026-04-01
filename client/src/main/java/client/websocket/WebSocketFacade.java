@@ -3,8 +3,8 @@ package client.websocket;
 import com.google.gson.Gson;
 import exception.ResponseException;
 import jakarta.websocket.*;
-import webSocketMessages.Action;
-import webSocketMessages.Notification;
+import websocket.commands.UserGameCommand; // replace Action
+import websocket.messages.ServerMessage; // replace Notification
 
 import java.io.IOException;
 import java.net.URI;

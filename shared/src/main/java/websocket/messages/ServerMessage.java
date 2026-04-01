@@ -1,5 +1,8 @@
 package websocket.messages;
 
+import chess.ChessGame;
+import com.google.gson.Gson;
+
 import java.util.Objects;
 
 /**
@@ -10,11 +13,22 @@ import java.util.Objects;
  */
 public class ServerMessage {
     ServerMessageType serverMessageType;
+    ChessGame game = null;
+    ChessGame.TeamColor color;
+    String msg;
+
+    public ServerMessage(ServerMessageType type, ChessGame game, ChessGame.TeamColor color, String msg) {
+        this.serverMessageType = type;
+        this.game = game;
+        this.color = color;
+        this.msg = msg;
+    }
 
     public enum ServerMessageType {
         LOAD_GAME,
         ERROR,
-        NOTIFICATION
+        NOTIFICATION,
+        ENTER
     }
 
     public ServerMessage(ServerMessageType type) {
@@ -23,6 +37,14 @@ public class ServerMessage {
 
     public ServerMessageType getServerMessageType() {
         return this.serverMessageType;
+    }
+
+    public ChessGame getGame() {
+        return game;
+    }
+
+    public String getMsg() {
+        return msg;
     }
 
     @Override
@@ -39,5 +61,9 @@ public class ServerMessage {
     @Override
     public int hashCode() {
         return Objects.hash(getServerMessageType());
+    }
+
+    public String toString() {
+        return new Gson().toJson(this);
     }
 }

@@ -7,6 +7,7 @@ import com.google.gson.Gson;
 import dataaccess.MySqlDataAccess;
 import exception.ResponseException;
 import io.javalin.http.Context;
+import model.BadRequestException;
 import model.GameData;
 import websocket.messages.Notification;
 import io.javalin.websocket.WsCloseContext;
@@ -19,6 +20,7 @@ import model.AuthData;
 import org.eclipse.jetty.websocket.api.Session;
 import service.Service;
 import websocket.commands.UserGameCommand;
+import websocket.messages.ServerMessage;
 
 import java.io.IOException;
 
@@ -39,9 +41,9 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         try {
             UserGameCommand action = new Gson().fromJson(ctx.message(), UserGameCommand.class);
             switch (action.getCommandType()) {
-                case CONNECT -> enter(action.getAuthToken(), action.getGameID(), action.get ctx.session);
+                case CONNECT -> enter(action.getAuthToken(), action.getGameID(), action.getColor(), ctx.session);
                 case MAKE_MOVE -> makeMove(action.getAuthToken(), action.getGameID(), action.getMove(), ctx.session);
-                case LEAVE -> exit(action.getAuthToken(), ctx.session);
+                case LEAVE -> exit(action.getAuthToken(), action.getGameID(), ctx.session);
                 case RESIGN -> resign(action.getAuthToken(), action.getGameID(), ctx.session);
             }
         } catch (IOException ex) {
@@ -54,23 +56,38 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         System.out.println("Websocket closed");
     }
 
-    private void enter(String authToken, Session session) throws IOException {
-        connections.add(session);
+    private void enter(String authToken, int gameID, ChessGame.TeamColor color, Session session) throws IOException {
+        connections.add(new Connection(gameID));
 
         AuthData auth = authenticate(authToken);
-        dataAccess.replaceUser();
-        var message = String.format("%s is connected.", auth.username());
-        var notification = new Notification(Notification.Type.ENTER, message);
-        connections.broadcastToGame(authToken, notification);
-        // THIS LINE NEEDS TO CHANGE TO ONLY NOTIFY ANOTHER USER IN THAT GAME IF THERE IS ONE
+        GameData game = dataAccess.getGame(gameID);
+        if ( (auth.username().equals(game.whiteUsername()) && color == ChessGame.TeamColor.WHITE) ||
+             (auth.username().equals(game.blackUsername()) && color == ChessGame.TeamColor.BLACK) ) {
+
+        } else {
+            dataAccess.replaceUser(color, auth.username(), gameID);
+        }
+
+        var message = String.format("%s is connected as %s.", auth.username(), color.toString());
+        var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, null, color, message);
+
+        connections.broadcastToGame(gameID, notification);
     }
 
-    private void exit(String authToken, Session session) throws IOException {
+    private void exit(String authToken, Integer gameID, ChessGame.TeamColor color, Session session) throws IOException {
         AuthData authData = authenticate(authToken);
+
         var message = String.format("%s left the game", authData.username());
-//        var notification = new Notification(Notification.Type.EXIT, message);
-//        connections.broadcast(session, notification); // yeah we need to change the broadcast here
-        connections.remove(session);
+        var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION,
+                                                            null, null, message);
+
+        if (connections.checkIsPlayer(gameID, color, authData.username())) {
+            connections.removeUser(gameID, color);
+
+            connections.broadcastToGame(gameID, notification);
+        } else {
+            throw new BadRequestException("not a valid player");
+        }
     }
 
     public void makeMove(String authToken, int gameID, ChessMove move, Session session) throws InvalidMoveException {
@@ -97,10 +114,10 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         // this is a placeholder
         AuthData authData = authenticate(authToken);
         var message = String.format("%s resigned the game.", authData.username());
-        var notification = new Notification(Notification.Type.EXIT, message);
-        connections.broadcast(session, notification); // inform other user of win, and curr user of loss
+        var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, null, message);
+        connections.broadcastToGame(authToken, notification); // inform other user of win, and curr user of loss
         // delete the game from the db as well probably too.
-        connections.remove(session);
+        connections.removeGame(authToken);
     }
 
     public AuthData authenticate(String auth) {
