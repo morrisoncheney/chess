@@ -11,13 +11,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ConnectionManager {
     public final ConcurrentHashMap<Integer, Connection> connections = new ConcurrentHashMap<>();
-        // the String key is an white, and the white in Connection is the other User's
+        // the String key is a white, and the white in Connection is the other User's
     public void add(Connection c) {
         connections.putIfAbsent(c.getGameID(), c);
-    }
-
-    public void remove(Integer gameID) {
-        connections.remove(gameID);
     }
 
     public boolean checkIsPlayer(Integer gameID, ChessGame.TeamColor color, String username) {
@@ -63,14 +59,48 @@ public class ConnectionManager {
             s.getRemote().sendString(msg);
         }
 
-        ArrayList<Session> list1 = new ArrayList<>();
-        list1.addAll(c.getObservers());
+        ArrayList<Session> list1 = new ArrayList<>(c.getObservers());
 
         for (Session sesh : list1) {
             if (sesh != null) {
                 sesh.getRemote().sendString(msg);
             }
         }
+    }
 
+    public void broadcastWithExclusion(ChessGame.TeamColor color, Integer gameID, ServerMessage notification) throws IOException {
+        String msg = notification.toString();
+        Session s;
+        Connection c = connections.get(gameID);
+        s = c.getWhiteSession();
+        if (s != null && color != ChessGame.TeamColor.WHITE) {
+            s.getRemote().sendString(msg);
+        }
+        s = c.getBlackSession();
+        if (s != null && color != ChessGame.TeamColor.BLACK) {
+            s.getRemote().sendString(msg);
+        }
+
+        ArrayList<Session> list1 = new ArrayList<>(c.getObservers());
+
+        for (Session sesh : list1) {
+            if (sesh != null) {
+                sesh.getRemote().sendString(msg);
+            }
+        }
+    }
+
+    public void broadcastToOne(ChessGame.TeamColor color, Integer gameID, ServerMessage notification) throws IOException {
+        String msg = notification.toString();
+        Session s;
+        Connection c = connections.get(gameID);
+        s = c.getWhiteSession();
+        if (s != null && color == ChessGame.TeamColor.WHITE) {
+            s.getRemote().sendString(msg);
+        }
+        s = c.getBlackSession();
+        if (s != null && color == ChessGame.TeamColor.BLACK) {
+            s.getRemote().sendString(msg);
+        }
     }
 }

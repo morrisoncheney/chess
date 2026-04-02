@@ -5,8 +5,6 @@ import chess.ChessMove;
 import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.MySqlDataAccess;
-import exception.ResponseException;
-import io.javalin.http.Context;
 import model.BadRequestException;
 import model.GameData;
 import io.javalin.websocket.WsCloseContext;
@@ -39,11 +37,10 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     public void handleMessage(WsMessageContext ctx) throws Exception {
         UserGameCommand action = new Gson().fromJson(ctx.message(), UserGameCommand.class);
         switch (action.getCommandType()) {
-            case CONNECT -> enter(action.getAuthToken(), action.getGameID(), action.getColor(), ctx.session);
-            case MAKE_MOVE -> makeMove(action.getAuthToken(), action.getGameID(),
-                                                                            action.getColor(), action.getMove());
-            case LEAVE -> exit(action.getAuthToken(), action.getGameID(), action.getColor());
-            case RESIGN -> resign(action.getAuthToken(), action.getGameID(), action.getColor());
+            case CONNECT -> enter(action.getAuthToken(), action.getGameID(), ctx.session);
+            case MAKE_MOVE -> makeMove(action.getAuthToken(), action.getGameID(), action.getMove());
+            case LEAVE -> exit(action.getAuthToken(), action.getGameID());
+            case RESIGN -> resign(action.getAuthToken(), action.getGameID());
         }
     }
 
@@ -52,21 +49,23 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         System.out.println("Websocket closed");
     }
 
-    private void enter(String authToken, int gameID, ChessGame.TeamColor color, Session session) throws IOException {
+    private void enter(String authToken, int gameID, Session session) throws IOException {
         connections.add(new Connection(gameID));
 
-        AuthData auth = authenticate(authToken);
+        AuthData authData = authenticate(authToken);
+        ChessGame.TeamColor color = getColor(gameID, authData);
 
-        connections.addUser(gameID, auth.username(), color, session);
+        connections.addUser(gameID, authData.username(), color, session);
         ChessGame game = dataAccess.getGame(gameID).game();
-        var message = String.format("%s is connected as %s.", auth.username(), color.toString());
+        var message = String.format("%s is connected as %s.", authData.username(), color.toString());
         var notification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, game, color, message);
 
         connections.broadcastToGame(gameID, notification);
     }
 
-    private void exit(String authToken, Integer gameID, ChessGame.TeamColor color) throws IOException {
+    private void exit(String authToken, Integer gameID) throws IOException {
         AuthData authData = authenticate(authToken);
+        ChessGame.TeamColor color = getColor(gameID, authData);
 
         var message = String.format("%s left the game", authData.username());
         var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION,
@@ -84,11 +83,11 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     public void makeMove(
             String authToken,
             int gameID,
-            ChessGame.TeamColor color,
             ChessMove move
     ) throws InvalidMoveException, IOException {
 
         AuthData authData = authenticate(authToken);
+        ChessGame.TeamColor color = getColor(gameID, authData);
         GameData gameData = dataAccess.getGame(gameID);
         ChessGame game = gameData.game();
         if (!(color == game.getBoard().getPiece(move.getStartPosition()).getTeamColor())) {
@@ -107,13 +106,14 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     }
 
-    private void resign(String authToken, Integer gameID, ChessGame.TeamColor color) throws IOException, InvalidMoveException {
+    private void resign(String authToken, Integer gameID) throws IOException, InvalidMoveException {
         // this is a placeholder
         AuthData authData = authenticate(authToken);
+        ChessGame.TeamColor color = getColor(gameID, authData);
 
         GameData gameData = dataAccess.getGame(gameID);
         ChessGame game = gameData.game();
-        game.resignation(color);
+        game.gameComplete();
         dataAccess.updateGame(game, gameID);
 
         var message = String.format("%s (%s) resigned the game.", authData.username(), color);
@@ -122,8 +122,18 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         connections.broadcastToGame(gameID, notification); // inform other user of win, and curr user of loss
     }
 
-    public AuthData authenticate(String auth) {
+    private AuthData authenticate(String auth) {
         return service.authenticate(auth);
+    }
+
+    private ChessGame.TeamColor getColor(Integer gameID, AuthData auth) {
+        GameData data = dataAccess.getGame(gameID);
+        if (data.whiteUsername().equals(auth.username())) {
+            return  ChessGame.TeamColor.WHITE;
+        } else if (data.blackUsername().equals(auth.username())) {
+            return ChessGame.TeamColor.BLACK;
+        }
+        throw new BadRequestException("this username was neither color.");
     }
 }
 

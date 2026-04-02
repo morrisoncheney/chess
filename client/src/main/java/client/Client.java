@@ -6,7 +6,6 @@ import chess.ChessGame;
 import java.util.Arrays;
 import java.util.Scanner;
 
-import client.websocket.ClientNotificationHandler;
 import client.websocket.NotificationHandler;
 import client.websocket.WebSocketFacade;
 import exception.ResponseException;
@@ -74,10 +73,11 @@ public class Client implements NotificationHandler {
                 case "list" -> listGames();
                 case "join" -> join(params);
                 case "observe" -> observe(params);
-//                case "move" ->
-//                case "resign" ->
-//                case "see_moves" ->
-//                case "leave" ->
+//                case "move" -> move(params);
+//                case "redraw" -> redraw(params);
+//                case "resign" -> resign(params);
+//                case "see_moves" -> seeMoves(params);
+//                case "leave" -> leaveGame(params);
                 case "logout" -> signOut();
                 case "clear" -> clearDB();
                 case "quit" -> "Bye bye.";
@@ -199,6 +199,51 @@ public class Client implements NotificationHandler {
         throw new ResponseException(ResponseException.Code.ClientError, "Expected: <gameID>");
     }
 
+    public String move(String... empty) throws ResponseException {
+        assertInGame("make a move");
+
+        // add a check to make sure empty is actually empty
+        System.out.print("From: ");
+        Scanner scanner = new Scanner(System.in);
+        String line = scanner.nextLine();
+
+        String[] tokens = line.toLowerCase().split(" ");
+        String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
+
+        if (params.length > 1) {
+            throw new ResponseException(ResponseException.Code.ClientError, "expected <row letter><col number>");
+        }
+        String startingSquare = params[0];
+
+        //convert startingSquare to a ChessPosition
+
+        // get the piece at the beginning square
+        // check color
+
+        System.out.print("To: ");
+        line = scanner.nextLine();
+
+        tokens = line.toLowerCase().split(" ");
+        params = Arrays.copyOfRange(tokens, 1, tokens.length);
+
+        if (params.length > 1) {
+            throw new ResponseException(ResponseException.Code.ClientError, "expected <row letter><col number>");
+        }
+        String endSquare = params[0];
+
+        //convert endSquare to a ChessPosition
+
+        // if pawn and finish square is back row
+        // get promo piece
+
+        // submit ws command
+
+        // adjust the ws so that this user prints the move here
+        // and ws sends it to everyone but this user
+
+        return "";
+    }
+
     public String signOut() throws ResponseException {
         assertSignedIn();
         server.logout(userAuth);
@@ -266,9 +311,32 @@ public class Client implements NotificationHandler {
 
     private void assertSignedOut(String tryingTo) throws ResponseException {
         if (state == State.SIGNEDIN) {
-            throw new ResponseException(ResponseException.Code.ClientError, String.format("You must sign out to %s.", tryingTo));
+            throw new ResponseException(
+                    ResponseException.Code.ClientError,
+                    String.format("You must sign out to %s.", tryingTo)
+            );
         }
     }
+
+    private void assertInGame(String tryingTo) throws ResponseException {
+        if (state == State.IN_GAME) {
+            throw new ResponseException(
+                    ResponseException.Code.ClientError,
+                    String.format("You must sign out to %s.", tryingTo)
+            );
+        }
+    }
+
+    private void assertInGameOrObserving(String tryingTo) throws ResponseException {
+        if (state == State.IN_GAME || state == State.OBSERVING) {
+            throw new ResponseException(
+                    ResponseException.Code.ClientError,
+                    String.format("You must be in a game to %s.", tryingTo)
+            );
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////
 
     public void notify(ServerMessage msg) {
         switch (msg.getServerMessageType()) {

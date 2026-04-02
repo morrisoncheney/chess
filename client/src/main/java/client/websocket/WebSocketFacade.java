@@ -50,9 +50,7 @@ public class WebSocketFacade extends Endpoint {
             UserGameCommand action = new UserGameCommand(
                     UserGameCommand.CommandType.CONNECT,
                     authToken,
-                    gameID,
-                    null,
-                    color
+                    gameID
             );
             this.session.getBasicRemote().sendText(new Gson().toJson(action));
         } catch (IOException ex) {
@@ -65,9 +63,7 @@ public class WebSocketFacade extends Endpoint {
             UserGameCommand action = new UserGameCommand(
                     UserGameCommand.CommandType.LEAVE,
                     authToken,
-                    gameID,
-                    null,
-                    color
+                    gameID
             );
             this.session.getBasicRemote().sendText(new Gson().toJson(action));
         } catch (IOException ex) {
@@ -81,8 +77,7 @@ public class WebSocketFacade extends Endpoint {
                     UserGameCommand.CommandType.MAKE_MOVE,
                     authToken,
                     gameID,
-                    move,
-                    color
+                    move
             );
             this.session.getBasicRemote().sendText(new Gson().toJson(action));
         } catch (IOException ex) {
@@ -95,9 +90,7 @@ public class WebSocketFacade extends Endpoint {
             UserGameCommand action = new UserGameCommand(
                     UserGameCommand.CommandType.RESIGN,
                     authToken,
-                    gameID,
-                    null,
-                    color
+                    gameID
             );
             this.session.getBasicRemote().sendText(new Gson().toJson(action));
         } catch (IOException ex) {

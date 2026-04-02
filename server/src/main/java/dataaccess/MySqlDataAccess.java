@@ -61,8 +61,6 @@ public class MySqlDataAccess { // this should use the same method names as Memor
         runUpdate(statement);
     }
 
-
-
     private String hashP(String clearPassword) {
         return BCrypt.hashpw(clearPassword, BCrypt.gensalt());
     }
@@ -101,7 +99,7 @@ public class MySqlDataAccess { // this should use the same method names as Memor
     }
 
     public void deleteAllAuthData() {
-        var statement = "DROP TABLE auths";
+        var statement = "TRUNCATE auths";
         runUpdate(statement);
     }
 
