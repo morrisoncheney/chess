@@ -170,7 +170,7 @@ public class Client implements NotificationHandler {
 
 
             server.join(gameID, color, userAuth);
-            ws.enter(userAuth, gameID, color);
+            ws.enter(userAuth, gameID);
             currGameID = gameID;
             userColor = color;
             state = State.IN_GAME;
@@ -191,6 +191,7 @@ public class Client implements NotificationHandler {
             if (gameID > maxGameID || gameID < 1) {
                 throw new ResponseException(ResponseException.Code.ClientError, "gameID too high");
             }
+            ws.enter(userAuth, gameID);
 
             state = State.OBSERVING;
 
@@ -350,8 +351,11 @@ public class Client implements NotificationHandler {
     public void loadGame(ServerMessage msg) {
         System.out.println("Incoming...\n");
         ChessGame game = msg.getGame();
-
-        BoardPrinter.printChessBoard(game.getBoard(), msg.getColor());
+        ChessGame.TeamColor c = msg.getColor();
+        if (c == null) {
+            c = ChessGame.TeamColor.WHITE;
+        }
+        BoardPrinter.printChessBoard(game.getBoard(), c);
         System.out.println(msg.getMsg());
         printPrompt();
     }

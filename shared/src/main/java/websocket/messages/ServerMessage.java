@@ -15,13 +15,14 @@ public class ServerMessage {
     ServerMessageType serverMessageType;
     ChessGame game = null;
     ChessGame.TeamColor color;
-    String msg;
+    String message;
+    String errorMessage;
 
-    public ServerMessage(ServerMessageType type, ChessGame game, ChessGame.TeamColor color, String msg) {
+    public ServerMessage(ServerMessageType type, ChessGame game, ChessGame.TeamColor color, String message) {
         this.serverMessageType = type;
         this.game = game;
         this.color = color;
-        this.msg = msg;
+        this.message = message;
     }
 
     public enum ServerMessageType {
@@ -48,7 +49,16 @@ public class ServerMessage {
     }
 
     public String getMsg() {
-        return msg;
+        return message;
+    }
+
+    public void setErrorMessage() {
+        this.errorMessage = this.message;
+        this.message = null;
+    }
+
+    public String getErrorMessage() {
+        return this.errorMessage;
     }
 
     @Override

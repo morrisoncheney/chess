@@ -68,23 +68,24 @@ public class ConnectionManager {
         }
     }
 
-    public void broadcastWithExclusion(ChessGame.TeamColor color, Integer gameID, ServerMessage notification) throws IOException {
+    public void broadcastWithExclusion(Session exclude, Integer gameID, ServerMessage notification) throws IOException {
+        System.out.println(notification.getMsg());
         String msg = notification.toString();
         Session s;
         Connection c = connections.get(gameID);
         s = c.getWhiteSession();
-        if (s != null && color != ChessGame.TeamColor.WHITE) {
+        if (s != null && s != exclude) {
             s.getRemote().sendString(msg);
         }
         s = c.getBlackSession();
-        if (s != null && color != ChessGame.TeamColor.BLACK) {
+        if (s != null && s != exclude) {
             s.getRemote().sendString(msg);
         }
 
         ArrayList<Session> list1 = new ArrayList<>(c.getObservers());
 
         for (Session sesh : list1) {
-            if (sesh != null) {
+            if (sesh != null && sesh != exclude) {
                 sesh.getRemote().sendString(msg);
             }
         }
@@ -101,6 +102,23 @@ public class ConnectionManager {
         s = c.getBlackSession();
         if (s != null && color == ChessGame.TeamColor.BLACK) {
             s.getRemote().sendString(msg);
+        }
+    }
+
+    public void broadcastToSession(Session s, ServerMessage notification) throws IOException {
+        String msg = notification.toString();
+        s.getRemote().sendString(msg);
+    }
+
+    public void removeSession(Session session) {
+        for (Connection c : connections.values()) {
+            if (session.equals(c.getWhiteSession())) {
+                c.setWhite(null, null);
+            } else if (session.equals(c.getBlackSession())) {
+                c.setBlack(null, null);
+            } else {
+                c.getObservers().remove(session);
+            }
         }
     }
 }

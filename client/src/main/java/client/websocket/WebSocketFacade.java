@@ -45,7 +45,7 @@ public class WebSocketFacade extends Endpoint {
     public void onOpen(Session session, EndpointConfig endpointConfig) {
     }
 
-    public void enter(String authToken, int gameID, ChessGame.TeamColor color) throws ResponseException {
+    public void enter(String authToken, int gameID) throws ResponseException {
         try {
             UserGameCommand action = new UserGameCommand(
                     UserGameCommand.CommandType.CONNECT,

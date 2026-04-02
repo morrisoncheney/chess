@@ -36,17 +36,29 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     @Override
     public void handleMessage(WsMessageContext ctx) throws Exception {
         UserGameCommand action = new Gson().fromJson(ctx.message(), UserGameCommand.class);
-        switch (action.getCommandType()) {
-            case CONNECT -> enter(action.getAuthToken(), action.getGameID(), ctx.session);
-            case MAKE_MOVE -> makeMove(action.getAuthToken(), action.getGameID(), action.getMove());
-            case LEAVE -> exit(action.getAuthToken(), action.getGameID());
-            case RESIGN -> resign(action.getAuthToken(), action.getGameID());
+        try {
+            switch (action.getCommandType()) {
+                case CONNECT -> enter(action.getAuthToken(), action.getGameID(), ctx.session);
+                case MAKE_MOVE -> makeMove(action.getAuthToken(), action.getGameID(), action.getMove());
+                case LEAVE -> exit(action.getAuthToken(), action.getGameID());
+                case RESIGN -> resign(action.getAuthToken(), action.getGameID());
+            }
+        } catch (Exception e) {
+            ServerMessage error = new ServerMessage(
+                    ServerMessage.ServerMessageType.ERROR,
+                    null,
+                    null,
+                    e.getMessage()
+            );
+            error.setErrorMessage();
+            connections.broadcastToSession(ctx.session, error);
         }
     }
 
     @Override
     public void handleClose(WsCloseContext ctx) {
-        System.out.println("Websocket closed");
+        connections.removeSession(ctx.session);
+        System.out.println("Websocket closed.");
     }
 
     private void enter(String authToken, int gameID, Session session) throws IOException {
@@ -57,10 +69,19 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
         connections.addUser(gameID, authData.username(), color, session);
         ChessGame game = dataAccess.getGame(gameID).game();
-        var message = String.format("%s is connected as %s.", authData.username(), color.toString());
-        var notification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, game, color, message);
+        String itemTwo;
+        if (color == null) {
+            itemTwo = "observer";
+        } else {
+            itemTwo = color.toString();
+        }
+        String message = String.format("%s is connected as %s.", authData.username(), itemTwo);
+        ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, game, color, null);
 
-        connections.broadcastToGame(gameID, notification);
+        connections.broadcastToSession(session, notification);
+
+        notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, null, color, message);
+        connections.broadcastWithExclusion(session, gameID, notification);
     }
 
     private void exit(String authToken, Integer gameID) throws IOException {
@@ -128,13 +149,19 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     private ChessGame.TeamColor getColor(Integer gameID, AuthData auth) {
         GameData data = dataAccess.getGame(gameID);
-        if (data.whiteUsername().equals(auth.username())) {
-            return  ChessGame.TeamColor.WHITE;
-        } else if (data.blackUsername().equals(auth.username())) {
-            return ChessGame.TeamColor.BLACK;
+        if (data == null) {
+            throw new BadRequestException("this game doesn't exist.");
         }
-        throw new BadRequestException("this username was neither color.");
+        System.out.println(auth);
+        System.out.println(data);
+         if (data.blackUsername().equals(auth.username())) {
+            return ChessGame.TeamColor.BLACK;
+        } else if (data.whiteUsername().equals(auth.username())) {
+            return  ChessGame.TeamColor.WHITE;
+        } else {
+             return null;
+         }
     }
 }
 
-// now I need to make sure that when the client recieves these messages they do the right thing with them.
+// now I need to make sure that when the client receives these messages they do the right thing with them.
