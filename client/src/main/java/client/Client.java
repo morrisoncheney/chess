@@ -1,12 +1,10 @@
 package client;
 
-import chess.ChessBoard;
-import chess.ChessGame;
+import chess.*;
 
 import java.util.Arrays;
 import java.util.Scanner;
 
-import chess.ChessPosition;
 import client.websocket.NotificationHandler;
 import client.websocket.WebSocketFacade;
 import exception.ResponseException;
@@ -53,6 +51,13 @@ public class Client implements NotificationHandler {
                 System.out.print(msg);
             }
         }
+        try {
+            if (state.equals(State.IN_GAME)) {
+                ws.exit(userAuth, currGameID, userColor);
+            }
+        } catch (Exception e) {
+            System.out.println("Error: exiting game failed.");
+        }
         System.out.println();
     }
 
@@ -74,11 +79,11 @@ public class Client implements NotificationHandler {
                 case "list" -> listGames();
                 case "join" -> join(params);
                 case "observe" -> observe(params);
-//                case "move" -> move(params);
-//                case "redraw" -> redraw(params);
-//                case "resign" -> resign(params);
+                case "move" -> move(params);
+                case "redraw" -> redraw();
+                case "resign" -> resign();
 //                case "see_moves" -> seeMoves(params);
-//                case "leave" -> leaveGame(params);
+                case "leave" -> leaveGame();
                 case "logout" -> signOut();
                 case "clear" -> clearDB();
                 case "quit" -> "Bye bye.";
@@ -201,6 +206,11 @@ public class Client implements NotificationHandler {
         throw new ResponseException(ResponseException.Code.ClientError, "Expected: <gameID>");
     }
 
+    public String redraw() throws ResponseException {
+        ws.makeMove(userAuth, currGameID, null, userColor);
+        return "";
+    }
+
     public String move(String... empty) throws ResponseException {
         assertInGame("make a move");
 
@@ -210,40 +220,63 @@ public class Client implements NotificationHandler {
         String line = scanner.nextLine();
 
         String[] tokens = line.toLowerCase().split(" ");
-        String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
 
-        if (params.length > 1) {
+        if (tokens.length > 1) {
             throw new ResponseException(ResponseException.Code.ClientError, "expected <row letter><col number>");
         }
-        String startingSquare = params[0];
+        String startingSquare = tokens[0];
 
         //convert startingSquare to a ChessPosition
         ChessPosition startPos = parsePosition(startingSquare);
 
         // get the piece at the beginning square
 
+        boolean isPawn = (ChessPiece.PieceType.PAWN == currBoard.getPiece(startPos).getPieceType());
+
+        ChessGame.TeamColor pieceColor = currBoard.getPiece(startPos).getTeamColor();
+
+        if (pieceColor != userColor) {
+            throw new ResponseException(ResponseException.Code.ClientError, "Error: you can't move a piece of the wrong color.");
+        }
+
         System.out.print("To: ");
         line = scanner.nextLine();
 
         tokens = line.toLowerCase().split(" ");
-        params = Arrays.copyOfRange(tokens, 1, tokens.length);
 
-        if (params.length > 1) {
+        if (tokens.length > 1) {
             throw new ResponseException(ResponseException.Code.ClientError, "expected <row letter><col number>");
         }
-        String endSquare = params[0];
+        String endSquare = tokens[0];
 
         //convert endSquare to a ChessPosition
         ChessPosition endPos = parsePosition(endSquare);
+        ChessPiece.PieceType promoType = null;
+        if (isPawn && (endPos.getRow() == 1 || endPos.getRow() == 8)) {
+            System.out.println("Promotion type: ");
+            line = scanner.nextLine();
+            tokens = line.toLowerCase().split(" ");
+            try {
+                promoType = ChessPiece.PieceType.valueOf(tokens[0]);
+            } catch (IllegalArgumentException e) {
+                throw new ResponseException(ResponseException.Code.ClientError, "Expected: <QUEEN|ROOK|BISHOP|KNIGHT>");
+            }
+        }
 
-        // if pawn and finish square is back row
-        // get promo piece
+        ChessMove move = new ChessMove(startPos, endPos, promoType);
 
-        // submit ws command
+        ws.makeMove(userAuth, currGameID, move, userColor);
 
-        // adjust the ws so that this user prints the move here
-        // and ws sends it to everyone but this user
+        return "";
+    }
 
+    public String resign() throws ResponseException {
+        ws.resign(userAuth, currGameID, userColor);
+        return "";
+    }
+
+    public String leaveGame() throws ResponseException {
+        ws.exit(userAuth, currGameID, userColor);
         return "";
     }
 
@@ -322,16 +355,16 @@ public class Client implements NotificationHandler {
     }
 
     private void assertInGame(String tryingTo) throws ResponseException {
-        if (state == State.IN_GAME) {
+        if (state != State.IN_GAME) {
             throw new ResponseException(
                     ResponseException.Code.ClientError,
-                    String.format("You must sign out to %s.", tryingTo)
+                    String.format("You must be playing a game to %s.", tryingTo)
             );
         }
     }
 
     private void assertInGameOrObserving(String tryingTo) throws ResponseException {
-        if (state == State.IN_GAME || state == State.OBSERVING) {
+        if (state != State.IN_GAME && state != State.OBSERVING) {
             throw new ResponseException(
                     ResponseException.Code.ClientError,
                     String.format("You must be in a game to %s.", tryingTo)
@@ -380,12 +413,11 @@ public class Client implements NotificationHandler {
         }
         currBoard = game.getBoard();
         BoardPrinter.printChessBoard(game.getBoard(), c);
-        System.out.println(msg.getMsg());
         printPrompt();
     }
 
     public void printError(ServerMessage msg) {
-        System.out.println("Incoming...\nError: " + msg.getMsg());
+        System.out.println("Incoming...\nError: " + msg.getErrorMessage());
         printPrompt();
     }
 
