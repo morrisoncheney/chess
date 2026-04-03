@@ -88,6 +88,10 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         AuthData authData = authenticate(authToken);
         ChessGame.TeamColor color = getColor(gameID, authData);
 
+        if (color != null) {
+            dataAccess.replaceUser(color, null, gameID);
+        }
+
         var message = String.format("%s left the game", authData.username());
         var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION,
                                                             null, null, message);
@@ -111,6 +115,17 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
         GameData gameData = dataAccess.getGame(gameID);
         ChessGame game = gameData.game();
+
+        if (move == null) {
+            ServerMessage redrawGame = new ServerMessage(
+                    ServerMessage.ServerMessageType.LOAD_GAME,
+                    game,
+                    (color == ChessGame.TeamColor.BLACK) ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE,
+                    null
+            );
+            connections.broadcastToSession(session, redrawGame);
+            return;
+        }
 
         if (game.getTeamTurn() == null) {
             throw new InvalidMoveException("game already over.");
@@ -204,14 +219,12 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
         System.out.println(auth);
         System.out.println(data);
-         if (data.blackUsername().equals(auth.username())) {
+         if (data.blackUsername() != null && data.blackUsername().equals(auth.username())) {
             return ChessGame.TeamColor.BLACK;
-        } else if (data.whiteUsername().equals(auth.username())) {
+        } else if (data.whiteUsername() != null && data.whiteUsername().equals(auth.username())) {
             return  ChessGame.TeamColor.WHITE;
         } else {
              return null;
          }
     }
 }
-
-// now I need to make sure that when the client receives these messages they do the right thing with them.

@@ -98,5 +98,19 @@ public class WebSocketFacade extends Endpoint {
         }
     }
 
+    public void redraw(String authToken, int gameID, ChessGame.TeamColor color) throws ResponseException {
+        try {
+            UserGameCommand action = new UserGameCommand(
+                    UserGameCommand.CommandType.MAKE_MOVE,
+                    authToken,
+                    gameID,
+                    null
+            );
+            this.session.getBasicRemote().sendText(new Gson().toJson(action));
+        } catch (IOException ex) {
+            throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
+        }
+    }
+
 }
 
