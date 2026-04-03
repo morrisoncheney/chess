@@ -6,6 +6,7 @@ import chess.ChessGame;
 import java.util.Arrays;
 import java.util.Scanner;
 
+import chess.ChessPosition;
 import client.websocket.NotificationHandler;
 import client.websocket.WebSocketFacade;
 import exception.ResponseException;
@@ -23,7 +24,7 @@ public class Client implements NotificationHandler {
     Integer currGameID = null;
     private ChessGame.TeamColor userColor;
     private String activeUsername;
-    private ChessBoard genericChessBoard = new ChessBoard();
+    private ChessBoard currBoard;
     private int maxGameID = 0; // get max game num and save it so observe won't work for that
     // should only accept ints
 
@@ -217,9 +218,9 @@ public class Client implements NotificationHandler {
         String startingSquare = params[0];
 
         //convert startingSquare to a ChessPosition
+        ChessPosition startPos = parsePosition(startingSquare);
 
         // get the piece at the beginning square
-        // check color
 
         System.out.print("To: ");
         line = scanner.nextLine();
@@ -233,6 +234,7 @@ public class Client implements NotificationHandler {
         String endSquare = params[0];
 
         //convert endSquare to a ChessPosition
+        ChessPosition endPos = parsePosition(endSquare);
 
         // if pawn and finish square is back row
         // get promo piece
@@ -337,6 +339,27 @@ public class Client implements NotificationHandler {
         }
     }
 
+    public static ChessPosition parsePosition(String pos) {
+        if (pos == null || pos.length() != 2) {
+            throw new IllegalArgumentException("Invalid position: \"" + pos + "\"");
+        }
+
+        char file = Character.toLowerCase(pos.charAt(0));
+        char rank = pos.charAt(1);
+
+        if (file < 'a' || file > 'h') {
+            throw new IllegalArgumentException("Invalid file: '" + file + "' (must be a–h)");
+        }
+        if (rank < '1' || rank > '8') {
+            throw new IllegalArgumentException("Invalid rank: '" + rank + "' (must be 1–8)");
+        }
+
+        int col = file - 'a' + 1; // a=1, b=2, ..., h=8
+        int row = rank - '0';     // '1'=1, ..., '8'=8
+
+        return new ChessPosition(row, col);
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////
 
     public void notify(ServerMessage msg) {
@@ -355,6 +378,7 @@ public class Client implements NotificationHandler {
         if (c == null) {
             c = ChessGame.TeamColor.WHITE;
         }
+        currBoard = game.getBoard();
         BoardPrinter.printChessBoard(game.getBoard(), c);
         System.out.println(msg.getMsg());
         printPrompt();
