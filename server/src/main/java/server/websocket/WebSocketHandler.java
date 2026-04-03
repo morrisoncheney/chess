@@ -39,9 +39,9 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         try {
             switch (action.getCommandType()) {
                 case CONNECT -> enter(action.getAuthToken(), action.getGameID(), ctx.session);
-                case MAKE_MOVE -> makeMove(action.getAuthToken(), action.getGameID(), action.getMove());
-                case LEAVE -> exit(action.getAuthToken(), action.getGameID());
-                case RESIGN -> resign(action.getAuthToken(), action.getGameID());
+                case MAKE_MOVE -> makeMove(action.getAuthToken(), action.getGameID(), action.getMove(), ctx.session);
+                case LEAVE -> exit(action.getAuthToken(), action.getGameID(), ctx.session);
+                case RESIGN -> resign(action.getAuthToken(), action.getGameID(), ctx.session);
             }
         } catch (Exception e) {
             ServerMessage error = new ServerMessage(
@@ -84,56 +84,106 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         connections.broadcastWithExclusion(session, gameID, notification);
     }
 
-    private void exit(String authToken, Integer gameID) throws IOException {
+    private void exit(String authToken, Integer gameID, Session session) throws IOException {
         AuthData authData = authenticate(authToken);
         ChessGame.TeamColor color = getColor(gameID, authData);
 
         var message = String.format("%s left the game", authData.username());
         var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION,
                                                             null, null, message);
-
-        if (connections.checkIsPlayer(gameID, color, authData.username())) {
-            connections.removeUser(gameID, color);
-
-            connections.broadcastToGame(gameID, notification);
-        } else {
-            throw new BadRequestException("not a valid player");
-        }
+        connections.removeSession(session);
+        connections.broadcastWithExclusion(session, gameID, notification);
     }
 
     public void makeMove(
             String authToken,
             int gameID,
-            ChessMove move
+            ChessMove move,
+            Session session
     ) throws InvalidMoveException, IOException {
 
         AuthData authData = authenticate(authToken);
         ChessGame.TeamColor color = getColor(gameID, authData);
+
+        if (color == null) {
+            throw new InvalidMoveException("observer cannot make moves.");
+        }
+
         GameData gameData = dataAccess.getGame(gameID);
         ChessGame game = gameData.game();
+
+        if (game.getTeamTurn() == null) {
+            throw new InvalidMoveException("game already over.");
+        }
+
         if (!(color == game.getBoard().getPiece(move.getStartPosition()).getTeamColor())) {
             throw new InvalidMoveException("looks like you are working for the wrong team");
         }
+
         game.makeMove(move);
+        String extra = "";
+        boolean gameOver = false;
+        ChessGame.TeamColor opponent = (color == ChessGame.TeamColor.BLACK) ? ChessGame.TeamColor.WHITE
+                                                                                        : ChessGame.TeamColor.BLACK;
+        if (game.isInCheckmate(opponent)) {
+            gameOver = true;
+            extra = String.format(" Checkmate! %s wins!", color.toString());
+            game.gameComplete();
+        } else if (game.isInStalemate(opponent)) {
+            gameOver = true;
+            extra = " Stalemate!";
+            game.gameComplete();
+        } else if (game.isInCheck(opponent)) {
+            extra = "Check!";
+        }
         dataAccess.updateGame(game, gameID);
+
+        var loadGame = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, game, color, null);
+        connections.broadcastToGame(gameID, loadGame);
         var message = String.format("%s calls %s [%s] -> %s!",
                 authData.username(),
                 game.getBoard().getPiece(move.getEndPosition()).getPieceType(),
                 move.getStartPosition().toString(),
                 move.getEndPosition().toString()
-                );
-        var notification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, game, color, message);
-        connections.broadcastToGame(gameID, notification);
+        );
+        if (!gameOver) {
+            message = message + extra;
+        }
+        ServerMessage notification = new ServerMessage(
+                ServerMessage.ServerMessageType.NOTIFICATION,
+                null,
+                null,
+                message
+        );
 
+        connections.broadcastWithExclusion(session, gameID, notification);
+        if (gameOver) {
+            notification = new ServerMessage(
+                    ServerMessage.ServerMessageType.NOTIFICATION,
+                    null,
+                    null,
+                    extra
+            );
+            connections.broadcastToGame(gameID, notification);
+        }
     }
 
-    private void resign(String authToken, Integer gameID) throws IOException, InvalidMoveException {
-        // this is a placeholder
+    private void resign(String authToken, Integer gameID, Session session) throws IOException, InvalidMoveException {
+
         AuthData authData = authenticate(authToken);
         ChessGame.TeamColor color = getColor(gameID, authData);
 
+        if (color == null) {
+            throw new InvalidMoveException("observer cannot resign");
+        }
+
         GameData gameData = dataAccess.getGame(gameID);
         ChessGame game = gameData.game();
+
+        if (game.getTeamTurn() == null) {
+            throw new InvalidMoveException("game already over.");
+        } // this should not be needed.
+
         game.gameComplete();
         dataAccess.updateGame(game, gameID);
 

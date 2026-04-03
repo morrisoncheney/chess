@@ -32,6 +32,8 @@ public class ConnectionManager {
             c.setWhite(username, session);
         } else if (color == ChessGame.TeamColor.BLACK) {
             c.setBlack(username, session);
+        } else if (color == null) {
+            c.addObserver(session);
         }
         connections.put(gameID, c);
     }
@@ -88,20 +90,6 @@ public class ConnectionManager {
             if (sesh != null && sesh != exclude) {
                 sesh.getRemote().sendString(msg);
             }
-        }
-    }
-
-    public void broadcastToOne(ChessGame.TeamColor color, Integer gameID, ServerMessage notification) throws IOException {
-        String msg = notification.toString();
-        Session s;
-        Connection c = connections.get(gameID);
-        s = c.getWhiteSession();
-        if (s != null && color == ChessGame.TeamColor.WHITE) {
-            s.getRemote().sendString(msg);
-        }
-        s = c.getBlackSession();
-        if (s != null && color == ChessGame.TeamColor.BLACK) {
-            s.getRemote().sendString(msg);
         }
     }
 
