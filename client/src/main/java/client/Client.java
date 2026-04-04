@@ -2,7 +2,9 @@ package client;
 
 import chess.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Scanner;
 
 import client.websocket.NotificationHandler;
@@ -83,10 +85,10 @@ public class Client implements NotificationHandler {
                 case "join" -> join(params);
                 case "observe" -> observe(params);
                 case "move" -> move(params);
-                case "redraw" -> redraw();
-                case "resign" -> resign();
-//                case "moves" -> seeMoves(params);
-                case "leave" -> leaveGame();
+                case "redraw" -> redraw(params);
+                case "resign" -> resign(params);
+                case "moves" -> seeMoves(params);
+                case "leave" -> leaveGame(params);
                 case "logout" -> signOut();
                 case "clear" -> clearDB();
                 case "quit" -> "Bye bye.";
@@ -105,6 +107,7 @@ public class Client implements NotificationHandler {
             activeUsername = auth.username();
             // can we check response codes here somehow?
             state = State.SIGNEDIN;
+            listGames();
             return String.format("Welcome back %s.\n", params[0]) + help();
         }
         throw new ResponseException(ResponseException.Code.ClientError, "Expected: <username> <password>");
@@ -215,7 +218,10 @@ public class Client implements NotificationHandler {
         throw new ResponseException(ResponseException.Code.ClientError, "Expected: <gameID>");
     }
 
-    public String redraw() throws ResponseException {
+    public String redraw(String... empty) throws ResponseException {
+        if (empty.length > 0) {
+            throw new ResponseException(ResponseException.Code.ClientError, "just type 'move'");
+        }
         ws.redraw(userAuth, currGameID, userColor);
         return "";
     }
@@ -224,6 +230,10 @@ public class Client implements NotificationHandler {
         assertInGame("make a move");
 
         // add a check to make sure empty is actually empty
+        if (empty.length > 0) {
+            throw new ResponseException(ResponseException.Code.ClientError, "just type 'move'");
+        }
+
         System.out.print("From: ");
         Scanner scanner = new Scanner(System.in);
         String line = scanner.nextLine();
@@ -279,7 +289,11 @@ public class Client implements NotificationHandler {
         return "";
     }
 
-    public String seeMoves() throws ResponseException {
+    public String seeMoves(String... empty) throws ResponseException {
+        if (empty.length > 0) {
+            throw new ResponseException(ResponseException.Code.ClientError, "just type 'moves'");
+        }
+
         assertInGameOrObserving("see moves");
         System.out.print("From: ");
         Scanner scanner = new Scanner(System.in);
@@ -300,16 +314,24 @@ public class Client implements NotificationHandler {
                     "you cannot see moves from a non-existent piece.");
         }
 
+        Collection<ChessMove> valMoves = currGame.validMoves(startPos);
 
+        BoardPrinter.printChessBoardWithMoves(currBoard(), userColor, valMoves);
         return "";
     }
 
-    public String resign() throws ResponseException {
+    public String resign(String... empty) throws ResponseException {
+        if (empty.length > 0) {
+            throw new ResponseException(ResponseException.Code.ClientError, "just type 'resign'");
+        }
         ws.resign(userAuth, currGameID, userColor);
         return "";
     }
 
-    public String leaveGame() throws ResponseException {
+    public String leaveGame(String... empty) throws ResponseException {
+        if (empty.length > 0) {
+            throw new ResponseException(ResponseException.Code.ClientError, "just type 'leave'");
+        }
         assertInGameOrObserving("leave game");
         ws.exit(userAuth, currGameID, userColor);
         state = State.SIGNEDIN;

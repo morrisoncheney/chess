@@ -1,13 +1,11 @@
 package ui;
 
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.*;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 
 import static ui.EscapeSequences.*;
@@ -36,8 +34,22 @@ public class BoardPrinter {
             colorInt = 1;
         }
 
-        drawChessBoard(out, board, colorInt);
+        drawChessBoard(out, board, colorInt, null);
 
+    }
+
+    public static void printChessBoardWithMoves(
+            ChessBoard board, ChessGame.TeamColor color, Collection<ChessMove> moves
+    ) {
+        var out = new PrintStream(System.out, true, StandardCharsets.UTF_8); // needed to print together
+        int colorInt;
+        if (color == ChessGame.TeamColor.WHITE){
+            colorInt = 0;
+        } else {
+            colorInt = 1;
+        }
+
+        drawChessBoard(out, board, colorInt, valMoves);
     }
 
     /**
@@ -46,7 +58,7 @@ public class BoardPrinter {
      * @param board what to print
      * @param color who to print for (white : 0, black : 1)
      */
-    private static void drawChessBoard(PrintStream out, ChessBoard board, int color) {
+    private static void drawChessBoard(PrintStream out, ChessBoard board, int color, Collection<ChessMove> moves) {
         out.print(ERASE_SCREEN);
 
         drawHorizontalLine(out, color);
