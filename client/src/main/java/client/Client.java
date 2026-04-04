@@ -413,20 +413,20 @@ public class Client implements NotificationHandler {
             throw new IllegalArgumentException("Invalid position: \"" + pos + "\"");
         }
 
-        char file = Character.toLowerCase(pos.charAt(0));
-        char rank = pos.charAt(1);
+        char col = Character.toLowerCase(pos.charAt(0));
+        char rawRow = pos.charAt(1);
 
-        if (file < 'a' || file > 'h') {
-            throw new IllegalArgumentException("Invalid file: '" + file + "' (must be a–h)");
+        if (col < 'a' || col > 'h') {
+            throw new IllegalArgumentException("Invalid col: '" + col + "' (must be a–h)");
         }
-        if (rank < '1' || rank > '8') {
-            throw new IllegalArgumentException("Invalid rank: '" + rank + "' (must be 1–8)");
+        if (rawRow < '1' || rawRow > '8') {
+            throw new IllegalArgumentException("Invalid rawRow: '" + rawRow + "' (must be 1–8)");
         }
 
-        int col = file - 'a' + 1; // a=1, b=2, ..., h=8
-        int row = rank - '0';     // '1'=1, ..., '8'=8
+        int colInt = col - 'a' + 1; // a=1, b=2, ..., h=8
+        int row = rawRow - '0';     // '1'=1, ..., '8'=8
 
-        return new ChessPosition(row, col);
+        return new ChessPosition(row, colInt);
     }
 
     public ChessBoard currBoard() {
