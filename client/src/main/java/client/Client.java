@@ -410,7 +410,7 @@ public class Client implements NotificationHandler {
 
     public static ChessPosition parsePosition(String pos) {
         if (pos == null || pos.length() != 2) {
-            throw new IllegalArgumentException("Invalid position: \"" + pos + "\"");
+            throw new IllegalArgumentException("Expected: <letter><number>");
         }
 
         char col = Character.toLowerCase(pos.charAt(0));
@@ -420,11 +420,11 @@ public class Client implements NotificationHandler {
             throw new IllegalArgumentException("Invalid col: '" + col + "' (must be a–h)");
         }
         if (rawRow < '1' || rawRow > '8') {
-            throw new IllegalArgumentException("Invalid rawRow: '" + rawRow + "' (must be 1–8)");
+            throw new IllegalArgumentException("Invalid row: '" + rawRow + "' (must be 1–8)");
         }
 
-        int colInt = col - 'a' + 1; // a=1, b=2, ..., h=8
-        int row = rawRow - '0';     // '1'=1, ..., '8'=8
+        int colInt = col - 'a' + 1;
+        int row = rawRow - '0';
 
         return new ChessPosition(row, colInt);
     }
