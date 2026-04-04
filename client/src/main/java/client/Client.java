@@ -140,7 +140,8 @@ public class Client implements NotificationHandler {
         for (GameDataListItem game : games.games()) {
             String whiteUsername = game.whiteUsername();
             String blackUsername = game.blackUsername();
-            result.append(String.format("ID[%d] / Name[%s] / White[%s] / Black[%s]",
+            result.append("\n");
+            result.append(String.format("ID[%d] / Name[%s] / White[%s] / Black[%s]\n",
                     game.gameID(),
                     game.gameName(),
                     whiteUsername,
@@ -316,7 +317,7 @@ public class Client implements NotificationHandler {
 
         Collection<ChessMove> valMoves = currGame.validMoves(startPos);
 
-        BoardPrinter.printChessBoardWithMoves(currBoard(), userColor, valMoves);
+        BoardPrinter.printChessBoardWithMoves(currBoard(), userColor, valMoves, startPos);
         return "";
     }
 
