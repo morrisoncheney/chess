@@ -22,6 +22,9 @@ public class Client implements NotificationHandler {
     Integer currGameID = null;
     private ChessGame.TeamColor userColor;
     private String activeUsername;
+
+    private ChessGame currGame;
+
     private ChessBoard currBoard;
     private int maxGameID = 0; // get max game num and save it so observe won't work for that
     // should only accept ints
@@ -134,8 +137,11 @@ public class Client implements NotificationHandler {
         for (GameDataListItem game : games.games()) {
             String whiteUsername = game.whiteUsername();
             String blackUsername = game.blackUsername();
-            result.append(String.format("ID[%d] Name[%s]\n" +
-                    "   White[%s] Black[%s]", game.gameID(), game.gameName(), whiteUsername, blackUsername)).append("\n\n");
+            result.append(String.format("ID[%d] / Name[%s] / White[%s] / Black[%s]",
+                    game.gameID(),
+                    game.gameName(),
+                    whiteUsername,
+                    blackUsername)).append("\n\n");
             if (game.gameID() > maxGameID) {
                 maxGameID = game.gameID();
             }
@@ -161,7 +167,8 @@ public class Client implements NotificationHandler {
             try {
                 gameID = Integer.valueOf(params[0]);
             } catch (NumberFormatException e) {
-                throw new ResponseException(ResponseException.Code.ClientError, String.format("%s is an invalid gameID value.", params[0]));
+                throw new ResponseException(ResponseException.Code.ClientError,
+                        String.format("%s is an invalid gameID value.", params[0]));
             }
             if (gameID > maxGameID) {
                 maxGameID = gameID;
@@ -171,7 +178,8 @@ public class Client implements NotificationHandler {
             try {
                 color = ChessGame.TeamColor.valueOf(params[1].toUpperCase());
             } catch (IllegalArgumentException e) {
-                throw new ResponseException(ResponseException.Code.ClientError, String.format("Expected: <WHITE|BLACK>. %s is an invalid color value.", params[1]));
+                throw new ResponseException(ResponseException.Code.ClientError,
+                        String.format("Expected: <WHITE|BLACK>. %s is an invalid color value.", params[1]));
             }
 
 
@@ -192,7 +200,8 @@ public class Client implements NotificationHandler {
             try {
                 gameID = Integer.valueOf(params[0]);
             } catch (NumberFormatException e) {
-                throw new ResponseException(ResponseException.Code.ClientError, String.format("%s is an invalid gameID value.", params[0]));
+                throw new ResponseException(ResponseException.Code.ClientError,
+                        String.format("%s is an invalid gameID value.", params[0]));
             }
             if (gameID > maxGameID || gameID < 1) {
                 throw new ResponseException(ResponseException.Code.ClientError, "gameID too high");
@@ -231,9 +240,9 @@ public class Client implements NotificationHandler {
 
         // get the piece at the beginning square
 
-        boolean isPawn = (ChessPiece.PieceType.PAWN == currBoard.getPiece(startPos).getPieceType());
+        boolean isPawn = (ChessPiece.PieceType.PAWN == currBoard().getPiece(startPos).getPieceType());
 
-        ChessGame.TeamColor pieceColor = currBoard.getPiece(startPos).getTeamColor();
+        ChessGame.TeamColor pieceColor = currBoard().getPiece(startPos).getTeamColor();
 
         if (pieceColor != userColor) {
             throw new ResponseException(ResponseException.Code.ClientError, "Error: you can't move a piece of the wrong color.");
@@ -270,12 +279,38 @@ public class Client implements NotificationHandler {
         return "";
     }
 
+    public String seeMoves() throws ResponseException {
+        assertInGameOrObserving("see moves");
+        System.out.print("From: ");
+        Scanner scanner = new Scanner(System.in);
+        String line = scanner.nextLine();
+
+        String[] tokens = line.toLowerCase().split(" ");
+
+        if (tokens.length > 1) {
+            throw new ResponseException(ResponseException.Code.ClientError, "expected <row letter><col number>");
+        }
+        String startingSquare = tokens[0];
+
+        //convert startingSquare to a ChessPosition
+        ChessPosition startPos = parsePosition(startingSquare);
+
+        if (currBoard().getPiece(startPos) == null) {
+            throw new ResponseException(ResponseException.Code.ClientError,
+                    "you cannot see moves from a non-existent piece.");
+        }
+
+
+        return "";
+    }
+
     public String resign() throws ResponseException {
         ws.resign(userAuth, currGameID, userColor);
         return "";
     }
 
     public String leaveGame() throws ResponseException {
+        assertInGameOrObserving("leave game");
         ws.exit(userAuth, currGameID, userColor);
         state = State.SIGNEDIN;
         return "";
@@ -394,6 +429,10 @@ public class Client implements NotificationHandler {
         return new ChessPosition(row, col);
     }
 
+    public ChessBoard currBoard() {
+        return currGame.getBoard();
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////
 
     public void notify(ServerMessage msg) {
@@ -412,7 +451,7 @@ public class Client implements NotificationHandler {
         if (c == null) {
             c = ChessGame.TeamColor.WHITE;
         }
-        currBoard = game.getBoard();
+        currGame = game;
         BoardPrinter.printChessBoard(game.getBoard(), c);
         printPrompt();
     }

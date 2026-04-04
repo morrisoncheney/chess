@@ -16,16 +16,6 @@ public class ConnectionManager {
         connections.putIfAbsent(c.getGameID(), c);
     }
 
-    public boolean checkIsPlayer(Integer gameID, ChessGame.TeamColor color, String username) {
-        if (color == ChessGame.TeamColor.WHITE) {
-            return connections.get(gameID).getWhiteUsername().equals(username);
-        } else if (color == ChessGame.TeamColor.BLACK) {
-            return connections.get(gameID).getBlackUsername().equals(username);
-        } else {
-            throw new BadRequestException("color can't be null you bot");
-        }
-    }
-
     public void addUser(Integer gameID, String username, ChessGame.TeamColor color, Session session) {
         Connection c = connections.get(gameID);
         if (color == ChessGame.TeamColor.WHITE) {
@@ -34,16 +24,6 @@ public class ConnectionManager {
             c.setBlack(username, session);
         } else if (color == null) {
             c.addObserver(session);
-        }
-        connections.put(gameID, c);
-    }
-
-    public void removeUser(Integer gameID, ChessGame.TeamColor color) {
-        Connection c = connections.get(gameID);
-        if (color == ChessGame.TeamColor.WHITE) {
-            c.setWhite(null, null);
-        } else if (color == ChessGame.TeamColor.BLACK) {
-            c.setBlack(null, null);
         }
         connections.put(gameID, c);
     }
