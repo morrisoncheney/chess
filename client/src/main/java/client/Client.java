@@ -82,7 +82,7 @@ public class Client implements NotificationHandler {
                 case "move" -> move(params);
                 case "redraw" -> redraw();
                 case "resign" -> resign();
-//                case "see_moves" -> seeMoves(params);
+//                case "moves" -> seeMoves(params);
                 case "leave" -> leaveGame();
                 case "logout" -> signOut();
                 case "clear" -> clearDB();
@@ -207,7 +207,7 @@ public class Client implements NotificationHandler {
     }
 
     public String redraw() throws ResponseException {
-        ws.makeMove(userAuth, currGameID, null, userColor);
+        ws.redraw(userAuth, currGameID, userColor);
         return "";
     }
 
@@ -277,6 +277,7 @@ public class Client implements NotificationHandler {
 
     public String leaveGame() throws ResponseException {
         ws.exit(userAuth, currGameID, userColor);
+        state = State.SIGNEDIN;
         return "";
     }
 
@@ -307,7 +308,7 @@ public class Client implements NotificationHandler {
 
     public String help() {
         String observing = SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + """
-                - see_moves
+                - moves
                 - leave
                 - logout
                 - help
@@ -322,8 +323,8 @@ public class Client implements NotificationHandler {
                     """ + RESET_BG_COLOR + SET_TEXT_COLOR_BLACK;
         } else if (state == State.IN_GAME) {
             return SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + """
-                - see_moves
                 - move
+                - resign
                 """ + observing;
         } else if (state == State.OBSERVING) {
             return observing;
