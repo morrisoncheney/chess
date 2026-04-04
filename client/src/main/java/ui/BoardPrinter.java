@@ -49,7 +49,7 @@ public class BoardPrinter {
             colorInt = 1;
         }
 
-        drawChessBoard(out, board, colorInt, valMoves);
+        drawChessBoard(out, board, colorInt, moves);
     }
 
     /**
@@ -59,16 +59,29 @@ public class BoardPrinter {
      * @param color who to print for (white : 0, black : 1)
      */
     private static void drawChessBoard(PrintStream out, ChessBoard board, int color, Collection<ChessMove> moves) {
-        out.print(ERASE_SCREEN);
+        if ( moves == null) {
+            out.print(ERASE_SCREEN);
 
-        drawHorizontalLine(out, color);
+            drawHorizontalLine(out, color);
 
-        for (int boardRow = 0; boardRow < BOARD_SIZE_IN_SQUARES; ++boardRow) {
+            for (int boardRow = 0; boardRow < BOARD_SIZE_IN_SQUARES; ++boardRow) {
 
-            drawRow(out, boardRow, color, board); // change the last number based on the color of the user
+                drawRow(out, boardRow, color, board); // change the last number based on the color of the user
 
+            }
+            drawHorizontalLine(out, color);
+        } else {
+            out.print(ERASE_SCREEN);
+
+            drawHorizontalLine(out, color);
+
+            for (int boardRow = 0; boardRow < BOARD_SIZE_IN_SQUARES; ++boardRow) {
+
+                drawRowWithMoves(out, boardRow, color, board, moves); // change the last number based on the color of the user
+
+            }
+            drawHorizontalLine(out, color);
         }
-        drawHorizontalLine(out, color);
     }
 
     /**
@@ -93,6 +106,61 @@ public class BoardPrinter {
                 } else {
                     setWhite(out);
 
+                }
+
+                if (squareRow == SQUARE_SIZE_IN_PADDED_CHARS / 2) {
+                    int prefixLength = SQUARE_SIZE_IN_PADDED_CHARS / 2;
+                    int suffixLength = SQUARE_SIZE_IN_PADDED_CHARS - prefixLength - 1;
+
+                    out.print(EMPTY.repeat(prefixLength));
+                    printPiece(out, board, boardRow, boardCol, color);
+                    out.print(EMPTY.repeat(suffixLength));
+                }
+                else {
+                    out.print(EMPTY.repeat(SQUARE_SIZE_IN_PADDED_CHARS / 2));
+                    out.print(EscapeSequences.EMPTY);
+                    out.print(EMPTY.repeat(SQUARE_SIZE_IN_PADDED_CHARS / 2));
+                }
+
+            }
+
+            printVerticalBar(out, boardRow, squareRow, color);
+
+            out.print(RESET_BG_COLOR);
+            out.println();
+        }
+    }
+
+    private static void drawRowWithMoves(
+            PrintStream out,
+            int boardRow,
+            int color,
+            ChessBoard board,
+            Collection<ChessMove> moves
+    ) {
+
+        for (int squareRow = 0; squareRow < SQUARE_SIZE_IN_PADDED_CHARS; ++squareRow) {
+
+            printVerticalBar(out, boardRow, squareRow, color);
+
+            for (int boardCol = 0; boardCol < BOARD_SIZE_IN_SQUARES; ++boardCol) {
+                ChessPosition p;
+                if (color == 1) {
+                    p = new ChessPosition(boardRow + 1, 8 - boardCol);
+                } else {
+                    p = new ChessPosition(8 - boardRow, boardCol + 1);
+                }
+                if ((boardRow + boardCol) % 2 == 1) { // just removed color thing (CODE QUALITY CHECK)
+
+                    setLightGrey(out);
+                    if (checkMoves(p, moves)) {
+                        setDGreen(out);
+                    }
+                } else {
+                    setWhite(out);
+                    if (checkMoves(p, moves)) {
+                        setGreen(out);
+                    }
                 }
 
                 if (squareRow == SQUARE_SIZE_IN_PADDED_CHARS / 2) {
@@ -168,8 +236,27 @@ public class BoardPrinter {
         out.println();
     }
 
+    private static boolean checkMoves(ChessPosition pos, Collection<ChessMove> moves) {
+        for (ChessMove m : moves) {
+            if (m.getEndPosition().equals(pos)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private static void setWhite(PrintStream out) {
         out.print(SET_BG_COLOR_WHITE);
+        out.print(SET_TEXT_COLOR_BLACK);
+    }
+
+    private static void setGreen(PrintStream out) {
+        out.print(SET_BG_COLOR_GREEN);
+        out.print(SET_TEXT_COLOR_BLACK);
+    }
+
+    private static void setDGreen(PrintStream out) {
+        out.print(SET_BG_COLOR_DARK_GREEN);
         out.print(SET_TEXT_COLOR_BLACK);
     }
 

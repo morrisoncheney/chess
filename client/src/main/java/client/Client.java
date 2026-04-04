@@ -144,7 +144,7 @@ public class Client implements NotificationHandler {
                     game.gameID(),
                     game.gameName(),
                     whiteUsername,
-                    blackUsername)).append("\n\n");
+                    blackUsername));
             if (game.gameID() > maxGameID) {
                 maxGameID = game.gameID();
             }
