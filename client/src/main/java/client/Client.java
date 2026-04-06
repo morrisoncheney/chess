@@ -211,7 +211,8 @@ public class Client implements NotificationHandler {
                 throw new ResponseException(ResponseException.Code.ClientError, "gameID too high");
             }
             ws.enter(userAuth, gameID);
-
+            currGameID = gameID;
+            userColor = ChessGame.TeamColor.WHITE;
             state = State.OBSERVING;
 
             return "Successfully observed.";
@@ -273,13 +274,13 @@ public class Client implements NotificationHandler {
         ChessPosition endPos = parsePosition(endSquare);
         ChessPiece.PieceType promoType = null;
         if (isPawn && (endPos.getRow() == 1 || endPos.getRow() == 8)) {
-            System.out.println("Promotion type: ");
+            System.out.print("Promotion type: ");
             line = scanner.nextLine();
             tokens = line.toLowerCase().split(" ");
             try {
-                promoType = ChessPiece.PieceType.valueOf(tokens[0]);
+                promoType = ChessPiece.PieceType.valueOf(tokens[0].toUpperCase());
             } catch (IllegalArgumentException e) {
-                throw new ResponseException(ResponseException.Code.ClientError, "Expected: <QUEEN|ROOK|BISHOP|KNIGHT>");
+                throw new ResponseException(ResponseException.Code.ClientError, "Expected: <QUEEN|ROOK|BISHOP|KNIGHT>" + "\n" + e.getMessage());
             }
         }
 
@@ -335,6 +336,7 @@ public class Client implements NotificationHandler {
         }
         assertInGameOrObserving("leave game");
         ws.exit(userAuth, currGameID, userColor);
+        userColor = null;
         state = State.SIGNEDIN;
         return "";
     }
@@ -475,7 +477,7 @@ public class Client implements NotificationHandler {
             c = ChessGame.TeamColor.WHITE;
         }
         currGame = game;
-        BoardPrinter.printChessBoard(game.getBoard(), c);
+        BoardPrinter.printChessBoard(game.getBoard(), userColor);
         printPrompt();
     }
 

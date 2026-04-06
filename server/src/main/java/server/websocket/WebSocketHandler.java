@@ -217,8 +217,6 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         if (data == null) {
             throw new BadRequestException("this game doesn't exist.");
         }
-        System.out.println(auth);
-        System.out.println(data);
          if (data.blackUsername() != null && data.blackUsername().equals(auth.username())) {
             return ChessGame.TeamColor.BLACK;
         } else if (data.whiteUsername() != null && data.whiteUsername().equals(auth.username())) {
