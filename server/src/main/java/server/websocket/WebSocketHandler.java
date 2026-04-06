@@ -109,10 +109,6 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         AuthData authData = authenticate(authToken);
         ChessGame.TeamColor color = getColor(gameID, authData);
 
-        if (color == null) {
-            throw new InvalidMoveException("observer cannot make moves.");
-        }
-
         GameData gameData = dataAccess.getGame(gameID);
         ChessGame game = gameData.game();
 
@@ -125,6 +121,10 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             );
             connections.broadcastToSession(session, redrawGame);
             return;
+        }
+
+        if (color == null) {
+            throw new InvalidMoveException("observer cannot make moves.");
         }
 
         if (game.getTeamTurn() == null) {
@@ -142,14 +142,16 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                                                                                         : ChessGame.TeamColor.BLACK;
         if (game.isInCheckmate(opponent)) {
             gameOver = true;
-            extra = String.format(" Checkmate! %s wins!", color.toString());
+            String checked = getUsername(opponent, gameID);
+            extra = String.format(" Checkmate! %s wins! %s is in checkmate!", color.toString(), checked);
             game.gameComplete();
         } else if (game.isInStalemate(opponent)) {
             gameOver = true;
             extra = " Stalemate!";
             game.gameComplete();
         } else if (game.isInCheck(opponent)) {
-            extra = "Check!";
+            String checked = getUsername(opponent, gameID);
+            extra = String.format("Check! %s is in check!", checked);
         }
         dataAccess.updateGame(game, gameID);
 
@@ -224,5 +226,16 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         } else {
              return null;
          }
+    }
+
+    private String getUsername(ChessGame.TeamColor color, int gameID) {
+        GameData data = dataAccess.getGame(gameID);
+        if (color == ChessGame.TeamColor.WHITE) {
+            return data.whiteUsername();
+        } else if (color == ChessGame.TeamColor.BLACK) {
+            return data.blackUsername();
+        } else {
+            return null;
+        }
     }
 }

@@ -222,7 +222,7 @@ public class Client implements NotificationHandler {
 
     public String redraw(String... empty) throws ResponseException {
         if (empty.length > 0) {
-            throw new ResponseException(ResponseException.Code.ClientError, "just type 'move'");
+            throw new ResponseException(ResponseException.Code.ClientError, "just type 'redraw'");
         }
         ws.redraw(userAuth, currGameID, userColor);
         return "";
@@ -326,6 +326,22 @@ public class Client implements NotificationHandler {
         if (empty.length > 0) {
             throw new ResponseException(ResponseException.Code.ClientError, "just type 'resign'");
         }
+
+        System.out.print("Are you sure ? <Y/N>: ");
+        Scanner scanner = new Scanner(System.in);
+        String line = scanner.nextLine();
+        if (line.length() > 1) {
+            throw new ResponseException(ResponseException.Code.ClientError, "Expected <Y|N>");
+        }
+
+        if (line.equals("Y")) {
+
+        } else if (line.equals("N")) {
+            return "Resignation cancelled.";
+        } else {
+            throw new ResponseException(ResponseException.Code.ClientError, "Expected <Y|N>");
+        }
+
         ws.resign(userAuth, currGameID, userColor);
         return "";
     }
